@@ -743,7 +743,9 @@ function startAudio(){
     const ns = ac.createBufferSource(); ns.buffer = buf; ns.loop = true;
     const ng = ac.createGain(); ng.gain.value = 0.1; ns.connect(ng); ng.connect(master); ns.start();
     ac.resume && ac.resume();
-    const sb = document.getElementById('snd'); if (sb) { sb.textContent = 'звук: вкл'; sb.setAttribute('aria-pressed','false'); }
+    const sb = document.getElementById('snd');
+    const lab = () => { if (!sb || muted || !ac) return; sb.textContent = ac.state === 'running' ? 'звук: вкл' : 'нажмите — включится звук'; sb.setAttribute('aria-pressed','false'); };
+    ac.onstatechange = lab; lab();   // пока браузер не разрешил звук — подсказка
   } catch (_) { ac = null; }
 }
 function zap(){

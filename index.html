@@ -502,7 +502,7 @@ let mode = 'mouse';
 const portrait0 = () => innerWidth < innerHeight || innerWidth <= 760;
 function layout(){
   vw = innerWidth; vh = innerHeight;
-  const s = Math.max(vw / IW, vh / IH) * (portrait0() ? 0.80 : 1.06);   // на телефоне отъезжаем: видно больше подъезда
+  const s = Math.max(vw / IW, vh / IH) * (portrait0() ? 1.06 : 1.06);   // на телефоне отъезжаем: видно больше подъезда
   W = IW * s; H = IH * s;
   scene.style.width = W + 'px'; scene.style.height = H + 'px'; scene.style.setProperty('--u', (W / IW) + 'px');
   minX = Math.min(0, vw - W); minY = Math.min(0, vh - H);

@@ -30,6 +30,9 @@ body.gl #gl{display:block}
 body.gl #bg{visibility:hidden}
 #bg{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .layer{position:absolute;pointer-events:none}
+.stlogo{position:absolute;left:0;top:0;width:1254px;height:1106px;transform-origin:0 0;background:#0b0b0b url(logo2.jpg) 0 -110px/1254px 1254px no-repeat;
+  filter:brightness(.97) contrast(1.05);box-shadow:inset 0 0 140px rgba(0,0,0,.5)}
+.stlogo::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,0) 45%,rgba(255,235,200,.16) 58%,rgba(255,255,255,0) 72%)}
 #dim-core{background:#020302;opacity:0}
 #dim-spill{background:radial-gradient(ellipse 50% 50% at 50% 52%,rgba(2,3,2,.9),rgba(2,3,2,.5) 50%,rgba(2,3,2,0) 100%);opacity:0}
 #lampglow{background:radial-gradient(circle,rgba(255,196,110,.55) 0%,rgba(255,170,70,.18) 38%,rgba(255,160,60,0) 70%);
@@ -329,13 +332,39 @@ BOX_COLS.forEach(r => {
   el.addEventListener('click', () => { if (!dragged) toast(EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)]); });
 });
 
+/* новый логотип в рамке стенда: плоская картинка, натянутая на четырёхугольник стенда (перспектива) */
+(function(){
+  const Q = [[1248,236],[1439,216],[1439,394],[1250,404]];            // TL, TR, BR, BL в пикселях сцены
+  const x0 = 1248, y0 = 216, bw = 191, bh = 188;
+  const SW = 1254, SH = 1106;                                          // кроп исходника: без лишнего чёрного снизу
+  const wrap = mk('div', 'layer', { x:x0, y:y0, w:bw, h:bh });
+  const face = document.createElement('div'); face.className = 'stlogo'; wrap.appendChild(face);
+  const dst = Q.map(p => [p[0]-x0, p[1]-y0]), src = [[0,0],[SW,0],[SW,SH],[0,SH]];
+  const A = [], B = [];
+  for (let i = 0; i < 4; i++){
+    const [x,y] = src[i], [u,v] = dst[i];
+    A.push([x,y,1,0,0,0,-u*x,-u*y]); B.push(u);
+    A.push([0,0,0,x,y,1,-v*x,-v*y]); B.push(v);
+  }
+  for (let i = 0; i < 8; i++){                                          // Гаусс
+    let m = i; for (let r = i+1; r < 8; r++) if (Math.abs(A[r][i]) > Math.abs(A[m][i])) m = r;
+    [A[i],A[m]] = [A[m],A[i]]; [B[i],B[m]] = [B[m],B[i]];
+    for (let r = i+1; r < 8; r++){ const f = A[r][i]/A[i][i]; for (let c = i; c < 8; c++) A[r][c] -= f*A[i][c]; B[r] -= f*B[i]; }
+  }
+  const h = new Array(8);
+  for (let i = 7; i >= 0; i--){ let t = B[i]; for (let c = i+1; c < 8; c++) t -= A[i][c]*h[c]; h[i] = t/A[i][i]; }
+  const M = 'matrix3d(' + [h[0],h[3],0,h[6], h[1],h[4],0,h[7], 0,0,1,0, h[2],h[5],0,1].join(',') + ')';
+  const fit = () => { const u = wrap.clientWidth / bw; face.style.transform = 'scale(' + u + ') ' + M; };
+  new ResizeObserver(fit).observe(wrap); fit();
+})();
+
 /* стенд */
 const stand = mk('button', 'hs', STAND); stand.type = 'button'; stand.setAttribute('aria-label', 'О городе');
 bindTip(stand, 'О городе<small>информационный стенд</small>');
 stand.addEventListener('click', () => {
   if (dragged) return;
   openModal('<div class="org">Администрация города Тёмный · Информационный стенд</div>' +
-    '<div class="about"><img src="logo.jpg" alt="Логотип «Тёмный»"><div><h2>Тёмный</h2>' +
+    '<div class="about"><img src="logo2.jpg" alt="Логотип «Тёмный»"><div><h2>Тёмный</h2>' +
     '<div class="tag">Город, в котором был каждый.</div><p>' + ABOUT + '</p></div></div>');
 });
 

@@ -198,6 +198,7 @@ body.in #contact2{opacity:1;pointer-events:auto}
   body.cview #contact{opacity:0;pointer-events:none;visibility:hidden}
   body.cview #contact .c-btn{pointer-events:none}
   #snd{display:none!important}
+  #toast{bottom:auto;top:calc(80px + env(safe-area-inset-top))}
   #contact{background:linear-gradient(180deg,rgba(24,20,12,.4),rgba(8,7,4,.5));backdrop-filter:none;-webkit-backdrop-filter:none}
   #contact .c-btn{background:rgba(10,8,4,.4)}
   #c-back{position:fixed;z-index:13;left:12px;top:calc(12px + env(safe-area-inset-top));display:none;padding:12px 16px;border-radius:4px;color:#e6d9ae;font:inherit;font-size:15px;letter-spacing:.14em;
@@ -326,7 +327,7 @@ function bindTip(el, html){
   el.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showTip(html, e); });
   el.addEventListener('pointermove',  e => { if (e.pointerType === 'mouse') moveTip(e); });
   el.addEventListener('pointerleave', hideTip);
-  el.addEventListener('focus', () => { const r = el.getBoundingClientRect(); showTip(html, {clientX:r.left, clientY:r.bottom}); });
+  el.addEventListener('focus', () => { if (matchMedia('(pointer:coarse)').matches) return; const r = el.getBoundingClientRect(); showTip(html, {clientX:r.left, clientY:r.bottom}); });
   el.addEventListener('blur', hideTip);
 }
 
@@ -487,7 +488,7 @@ stand.addEventListener('click', () => {
 /* лифт */
 const lift = mk('button', 'hs', LIFT); lift.type = 'button'; lift.setAttribute('aria-label', 'Лифт');
 bindTip(lift, 'Лифт');
-const LIFT_LINES = ['Лифт поедет, когда вы будете готовы.\nВы не готовы.'];
+const LIFT_LINES = ['Не надо туда идти.'];
 lift.addEventListener('click', () => { if (!dragged) { toast(LIFT_LINES[Math.floor(Math.random() * LIFT_LINES.length)]); zap(); } });
 
 /* ---------- раскладка и панорама ---------- */

@@ -170,7 +170,6 @@ body.in #contact{opacity:1;pointer-events:auto}
   <div id="scene">
     <canvas id="gl"></canvas>
     <img id="bg" src="scene.jpg" alt="Подъезд с лифтом, почтовыми ящиками и стендом «Тёмный»" draggable="false">
-    <div id="floorlight" class="layer"></div>
     <div id="lampglow" class="layer"></div>
     <div id="dim-spill" class="layer"></div>
     <div id="dim-core" class="layer"></div>
@@ -229,7 +228,6 @@ function mk(tag, cls, r, parent){
 
 place($('#dim-core'),  { x:LIFT.x-1, y:236, w:LIFT.w+2, h:IH-236 });
 place($('#dim-spill'), { x:LIFT.x-80, y:LIFT.y-110, w:LIFT.w+160, h:LIFT.h+110 });
-place($('#floorlight'),{ x:LIFT.x-60, y:IH-70, w:LIFT.w+120, h:70 });
 place($('#lampglow'),  { x:LAMP.cx-LAMP.r, y:LAMP.cy-LAMP.r, w:LAMP.r*2, h:LAMP.r*2 });
 place($('#indicator'), INDIC);
 
@@ -518,7 +516,7 @@ function startAudio(){
   if (ac) return;
   try {
     ac = new (window.AudioContext || window.webkitAudioContext)();
-    master = ac.createGain(); master.gain.value = 0.4; master.connect(ac.destination);
+    master = ac.createGain(); master.gain.value = 0.25; master.connect(ac.destination);
     // низкий гул
     const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 50;
     const o2 = ac.createOscillator(); o2.type = 'square'; o2.frequency.value = 100.4;
@@ -547,7 +545,7 @@ function zap(){
 }
 $('#snd').addEventListener('click', e => {
   if (!ac) { startAudio(); return; }
-  muted = !muted; if (master) master.gain.value = muted ? 0 : 0.4;
+  muted = !muted; if (master) master.gain.value = muted ? 0 : 0.25;
   e.currentTarget.textContent = muted ? 'звук: выкл' : 'звук: вкл';
   e.currentTarget.setAttribute('aria-pressed', String(muted));
 });
@@ -566,6 +564,7 @@ function enterScene(){
 const firstGesture = () => { startAudio(); ['pointerdown','keydown','touchstart'].forEach(ev => document.removeEventListener(ev, firstGesture)); };
 ['pointerdown','keydown','touchstart'].forEach(ev => document.addEventListener(ev, firstGesture));
 enterScene();
+startAudio();
 </script>
 </body>
 </html>

@@ -37,7 +37,7 @@ body.gl #bg{visibility:hidden}
   background:linear-gradient(100deg,rgba(6,12,6,.45),rgba(6,12,6,.12) 55%,rgba(55,38,16,.16)),
              url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .45  0 0 0 .55 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>");
   opacity:.9;mix-blend-mode:multiply}
-#dim-core{background:#020302;opacity:0}
+#dim-core{background:#020302;opacity:0;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 16%);mask-image:linear-gradient(to bottom,transparent 0,#000 16%)}
 #dim-spill{background:radial-gradient(ellipse 50% 50% at 50% 52%,rgba(2,3,2,.9),rgba(2,3,2,.5) 50%,rgba(2,3,2,0) 100%);opacity:0}
 #lampglow{background:radial-gradient(circle,rgba(255,196,110,.55) 0%,rgba(255,170,70,.18) 38%,rgba(255,160,60,0) 70%);
   mix-blend-mode:screen;animation:breathe 6s ease-in-out infinite}
@@ -82,7 +82,7 @@ body.gl #bg{visibility:hidden}
 #hint.on{opacity:.9}
 #toast{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;
   max-width:min(88vw,420px);padding:12px 18px;background:rgba(10,9,6,.92);border:1px solid rgba(201,164,94,.4);
-  color:#eadfc0;font-size:14px;line-height:1.5;text-align:center;opacity:0;pointer-events:none;transition:opacity .4s}
+  color:#eadfc0;font-size:14px;line-height:1.5;text-align:center;white-space:pre-line;opacity:0;pointer-events:none;transition:opacity .4s}
 #toast.on{opacity:1}
 #snd{position:fixed;left:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:15;padding:8px 10px;
   font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8d8366;opacity:0;transition:opacity 2s 2s,color .2s}
@@ -144,6 +144,20 @@ body.in #contact{opacity:1;pointer-events:auto}
 .hdr-note{position:absolute;pointer-events:none;transform:rotate(-1deg);background:#d8d0b0;color:#2a2517;text-align:center;
   font-size:calc(var(--u,1px)*12.5);letter-spacing:.14em;text-transform:uppercase;font-weight:700;
   display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.6)}
+
+/* правая сторона: стекло, как «Следить за городом» */
+.hs .tag,.hs .tag.b{transform:none;background:linear-gradient(180deg,rgba(24,20,12,.78),rgba(8,7,4,.86));color:#e6d9ae;
+  border:1px solid rgba(255,220,150,.28);box-shadow:0 0 calc(var(--u,1px)*8) rgba(255,180,80,.16),inset 0 0 calc(var(--u,1px)*6) rgba(255,170,70,.07);
+  top:-4%;height:108%;left:2%;right:2%;opacity:0;text-shadow:0 1px 3px #000}
+.hs .tag::before{display:none}
+.hs .tag.on{opacity:1}
+.hs .tag .st{border:1px solid rgba(255,220,150,.3);background:rgba(0,0,0,.4);color:#e6d9ae}
+.hs:hover .tag.on,.hs:focus-visible .tag.on{background:linear-gradient(180deg,rgba(60,42,18,.85),rgba(20,14,6,.9));color:#fff1c4;transform:none;
+  border-color:rgba(255,205,130,.7);box-shadow:0 0 calc(var(--u,1px)*14) rgba(255,180,80,.4)}
+.hdr-note{transform:none;background:none;box-shadow:none;color:#e6d9ae;font-weight:400;letter-spacing:.24em;
+  text-shadow:0 0 calc(var(--u,1px)*8) rgba(255,190,100,.4),0 1px 3px #000;opacity:0;animation:cflick 7s infinite}
+.hdr-note.on{opacity:1}
+.hs .tag,.hdr-note{transition:opacity .12s}
 /* modal */
 #modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;
   background:rgba(2,2,1,.72);backdrop-filter:blur(2px)}
@@ -178,7 +192,7 @@ body.in #contact{opacity:1;pointer-events:auto}
 <main id="viewport" aria-label="Подъезд города Тёмный">
   <div id="scene">
     <canvas id="gl"></canvas>
-    <img id="bg" src="scene2.jpg" alt="Подъезд с лифтом, почтовыми ящиками и стендом «Тёмный»" draggable="false">
+    <img id="bg" src="scene3.jpg" alt="Подъезд с лифтом, почтовыми ящиками и стендом «Тёмный»" draggable="false">
     <div id="lampglow" class="layer"></div>
     <div id="dim-spill" class="layer"></div>
     <div id="dim-core" class="layer"></div>
@@ -235,7 +249,7 @@ function mk(tag, cls, r, parent){
   const el = document.createElement(tag); if (cls) el.className = cls; place(el, r); (parent || scene).appendChild(el); return el;
 }
 
-place($('#dim-core'),  { x:LIFT.x-1, y:236, w:LIFT.w+2, h:IH-236 });
+place($('#dim-core'),  { x:LIFT.x-1, y:226, w:LIFT.w+2, h:IH-226 });
 place($('#dim-spill'), { x:LIFT.x-80, y:LIFT.y-110, w:LIFT.w+160, h:LIFT.h+110 });
 place($('#lampglow'),  { x:LAMP.cx-LAMP.r, y:LAMP.cy-LAMP.r, w:LAMP.r*2, h:LAMP.r*2 });
 place($('#indicator'), INDIC);
@@ -275,7 +289,7 @@ modal.addEventListener('click', e => { if (e.target === modal || e.target.closes
 addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
 /* ---------- почта (окно с адресом) ---------- */
-const MAIL = 'gorodtemniy@gmail.com';
+const MAIL = 'gorodtemny@gmail.com';
 function openMail(){
   openModal('<div class="mailcard"><div class="org">Администрация города Тёмный</div><h2>Приёмная города</h2>' +
     '<p>Жалобы, наблюдения, свидетельства о Сиянии и всё, что вы не смогли объяснить, присылайте сюда.</p>' +
@@ -320,12 +334,25 @@ function labelBox(i, cls, title, sub, icon, tipHtml, make){
   t.innerHTML = '<span class="st">'+icon+'</span><span><b>'+title+'</b><i>'+sub+'</i></span>';
   el.appendChild(t); bindTip(el, tipHtml); return el;
 }
-labelBox(0, 'a', 'Telegram', 'написать нам', IC_TG, 'Свяжитесь с нами<small>Telegram @gorodtemny</small>', r => {
-  const el = mk('a', 'hs', r); el.href = 'https://t.me/gorodtemny'; el.target = '_blank'; el.rel = 'noopener noreferrer'; return el; });
-labelBox(1, 'b', 'Почта', 'написать письмо', IC_ML, 'Свяжитесь с нами<small>gorodtemniy@gmail.com</small>', r => {
+labelBox(0, 'a', 'Telegram', 'написать нам', IC_TG, 'Свяжитесь с нами<small>Telegram @gorodtemny_bot</small>', r => {
+  const el = mk('a', 'hs', r); el.href = 'https://t.me/gorodtemny_bot'; el.target = '_blank'; el.rel = 'noopener noreferrer'; return el; });
+labelBox(1, 'b', 'Почта', 'написать письмо', IC_ML, 'Свяжитесь с нами<small>gorodtemny@gmail.com</small>', r => {
   const el = mk('button', 'hs', r); el.type = 'button'; el.addEventListener('click', () => { if (!dragged) openMail(); }); return el; });
 { const h = mk('div','hdr-note',{x:RIGHT_COL.x-6,y:BOX_ROWS_Y[0]-RIGHT_COL.h/2-34,w:RIGHT_COL.w+6,h:22}); h.textContent='Свяжитесь с нами'; }
 
+
+/* случайное появление плиток справа */
+(function(){
+  const items = [...document.querySelectorAll('.hs .tag'), document.querySelector('.hdr-note')];
+  items.forEach((el,i) => {
+    const run = () => {
+      let n = 2 + Math.floor(Math.random()*3), t = 0;
+      for (let k = 0; k < n; k++){ setTimeout(() => el.classList.add('on'), t); t += 40 + Math.random()*120; setTimeout(() => el.classList.remove('on'), t); t += 30 + Math.random()*140; }
+      setTimeout(() => el.classList.add('on'), t);
+    };
+    setTimeout(() => { run(); (function loop(){ setTimeout(() => { el.classList.remove('on'); setTimeout(run, 120 + Math.random()*400); loop(); }, 9000 + Math.random()*14000); })(); }, 600 + i*700 + Math.random()*1200);
+  });
+})();
 /* ---------- ящики: просто часть сцены ---------- */
 /* левая колонка: «пустые» ящики */
 const BOX_COLS = [
@@ -377,7 +404,7 @@ stand.addEventListener('click', () => {
 /* лифт */
 const lift = mk('button', 'hs', LIFT); lift.type = 'button'; lift.setAttribute('aria-label', 'Лифт');
 bindTip(lift, 'Лифт');
-const LIFT_LINES = ['Лифт поедет, когда вы будете готовы. Вы не готовы.'];
+const LIFT_LINES = ['Лифт поедет, когда вы будете готовы.\nВы не готовы.'];
 lift.addEventListener('click', () => { if (!dragged) { toast(LIFT_LINES[Math.floor(Math.random() * LIFT_LINES.length)]); zap(); } });
 
 /* ---------- раскладка и панорама ---------- */
@@ -440,7 +467,8 @@ function initGL(sceneImg, depthImg){
   if (!gl) return null;
   const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,1.-(a.y*.5+.5));gl_Position=vec4(a,0.,1.);}';
   const fs = 'precision highp float;varying vec2 v;uniform sampler2D t,d;uniform vec2 o;' +
-    'void main(){vec2 p=v;for(int i=0;i<5;i++){float z=texture2D(d,p).r;p=v+o*(z-.5);}' +
+    'float D(vec2 q){float e=.005;return (texture2D(d,q).r*2.+texture2D(d,q+vec2(e,0.)).r+texture2D(d,q-vec2(e,0.)).r+texture2D(d,q+vec2(0.,e)).r+texture2D(d,q-vec2(0.,e)).r+texture2D(d,q+vec2(e,e)*1.5).r+texture2D(d,q-vec2(e,e)*1.5).r)/8.;}' +
+    'void main(){vec2 p=v;for(int i=0;i<5;i++){float z=D(p);p=v+o*(z-.5);}' +
     'gl_FragColor=texture2D(t,clamp(p,vec2(0.),vec2(1.)));}';
   const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x);
     if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(x)); return x; };
@@ -498,7 +526,7 @@ function parallaxFrame(){
   const go = () => { if (++n < 2) return;
     try { glr = initGL(si, di); if (!glr) return; setupDepth(di); sizeGL(); document.body.classList.add('gl'); }
     catch (_) { glr = null; document.body.classList.remove('gl'); } };
-  si.onload = di.onload = go; si.src = 'scene2.jpg'; di.src = 'depth.png';
+  si.onload = di.onload = go; si.src = 'scene3.jpg'; di.src = 'depth.png';
 })();
 addEventListener('resize', sizeGL);
 
@@ -530,7 +558,7 @@ const ind = $('#indicator'), face = $('#indface'), digit = $('#digit');
   const fit = () => { face.style.transform = 'scale(' + (ind.clientWidth / bw) + ') ' + M; };
   new ResizeObserver(fit).observe(ind); fit();
 })();
-const SEQ = ['1','1','1','0','1','4:44','1','-1','1','3','1','-10','1','6','1','13','1','1','0','1','27','1','4:44','1','-1','1','66','1','9','1','-3','1','0','1','88','1','2','1','-13','1','4:44','1'];
+const SEQ = ['1','1','1','0','1','4:44','1','-1','1','3','1','-10','1','6','1','13','1','1','0','1','27','1','4:44','1','-1','1','66','1','9','1','-3','1','0','1','88','1','2','1','-13','1','4:44','1','-82','1','66','1','-66','1','99','1','-7','1','13','1','0:00','1','-44','1'];
 let si = 0, secret = false;
 function fontFor(t){ return t.length >= 4 ? 170 : t.length === 3 ? 215 : t.length === 2 ? 250 : 290; }
 function setDigit(t){ digit.textContent = t; face.style.fontSize = fontFor(t) + 'px'; }

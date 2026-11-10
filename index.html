@@ -158,6 +158,20 @@ body.in #contact{opacity:1;pointer-events:auto}
   text-shadow:0 0 calc(var(--u,1px)*8) rgba(255,190,100,.4),0 1px 3px #000;opacity:0;animation:cflick 7s infinite}
 .hdr-note.on{opacity:1}
 .hs .tag,.hdr-note{transition:opacity .12s}
+
+.cbtn{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u,1px)*4);text-align:center;color:#d9cca3;text-decoration:none;
+  background:linear-gradient(180deg,rgba(24,20,12,.52),rgba(8,7,4,.62));border:1px solid rgba(255,220,150,.22);border-radius:calc(var(--u,1px)*4);
+  box-shadow:0 calc(var(--u,1px)*8) calc(var(--u,1px)*24) rgba(0,0,0,.5),inset 0 1px 0 rgba(255,225,160,.14),inset 0 0 calc(var(--u,1px)*20) rgba(255,170,70,.05);
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);text-shadow:0 1px 3px #000;opacity:0;transition:opacity .12s,background .25s,border-color .25s,box-shadow .25s;font:inherit}
+.cbtn.on{opacity:1}
+.cbtn .ci{width:calc(var(--u,1px)*22);height:calc(var(--u,1px)*22);padding:calc(var(--u,1px)*8);box-sizing:content-box;border-radius:calc(var(--u,1px)*3);
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,220,150,.18);color:#e6d9ae;display:block}
+.cbtn .ci svg{width:100%;height:100%;display:block}
+.cbtn .cn{font-size:calc(var(--u,1px)*13);letter-spacing:.14em;text-transform:uppercase}
+.cbtn .ch{font-size:calc(var(--u,1px)*9.5);letter-spacing:.02em;opacity:.65}
+.cbtn:hover{color:#fff1c4;background:rgba(255,190,100,.14);border-color:rgba(255,205,130,.6);box-shadow:0 0 calc(var(--u,1px)*18) rgba(255,180,80,.3)}
+.cbtn:hover .ci{color:#fff1c4;border-color:rgba(255,205,130,.7)}
+.hdr-note{font-size:calc(var(--u,1px)*13)!important;letter-spacing:.28em!important;color:#e6d9ae!important}
 /* modal */
 #modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;
   background:rgba(2,2,1,.72);backdrop-filter:blur(2px)}
@@ -334,16 +348,22 @@ function labelBox(i, cls, title, sub, icon, tipHtml, make){
   t.innerHTML = '<span class="st">'+icon+'</span><span><b>'+title+'</b><i>'+sub+'</i></span>';
   el.appendChild(t); bindTip(el, tipHtml); return el;
 }
-labelBox(0, 'a', 'Telegram', 'написать нам', IC_TG, 'Свяжитесь с нами<small>Telegram @gorodtemny_bot</small>', r => {
+const CB_Y = LEFT_ROWS_Y[0] - 19, CB_H = BOX_ROWS_Y[1] - BOX_ROWS_Y[0] + 36;   // высота на два ящика (73–74 и 81–82)
+function cbtn(r, icon, title, handle, tipHtml, make){
+  const el = make(r); el.classList.add('cbtn'); el.setAttribute('aria-label', 'Написать нам: ' + title);
+  el.innerHTML = '<span class="ci">'+icon+'</span><span class="cn">'+title+'</span><span class="ch">'+handle+'</span>';
+  bindTip(el, tipHtml); return el;
+}
+cbtn({ x:LEFT_COL.x, y:CB_Y, w:LEFT_COL.w, h:CB_H }, IC_TG, 'Telegram', '@gorodtemny_bot', 'Написать нам<small>Telegram @gorodtemny_bot</small>', r => {
   const el = mk('a', 'hs', r); el.href = 'https://t.me/gorodtemny_bot'; el.target = '_blank'; el.rel = 'noopener noreferrer'; return el; });
-labelBox(1, 'b', 'Почта', 'написать письмо', IC_ML, 'Свяжитесь с нами<small>gorodtemny@gmail.com</small>', r => {
+cbtn({ x:RIGHT_COL.x + 14, y:CB_Y, w:LEFT_COL.w, h:CB_H }, IC_ML, 'Почта', 'gorodtemny@gmail.com', 'Написать письмо<small>gorodtemny@gmail.com</small>', r => {
   const el = mk('button', 'hs', r); el.type = 'button'; el.addEventListener('click', () => { if (!dragged) openMail(); }); return el; });
-{ const h = mk('div','hdr-note',{x:RIGHT_COL.x-6,y:BOX_ROWS_Y[0]-RIGHT_COL.h/2-34,w:RIGHT_COL.w+6,h:22}); h.textContent='Свяжитесь с нами'; }
+{ const h = mk('div','hdr-note',{x:LEFT_COL.x, y:CB_Y - 30, w:RIGHT_COL.x + 14 + LEFT_COL.w - LEFT_COL.x, h:22}); h.textContent='Написать нам'; }
 
 
 /* случайное появление плиток справа */
 (function(){
-  const items = [...document.querySelectorAll('.hs .tag'), document.querySelector('.hdr-note')];
+  const items = [...document.querySelectorAll('.cbtn'), document.querySelector('.hdr-note')];
   items.forEach((el,i) => {
     const run = () => {
       let n = 2 + Math.floor(Math.random()*3), t = 0;
@@ -356,8 +376,8 @@ labelBox(1, 'b', 'Почта', 'написать письмо', IC_ML, 'Свяж
 /* ---------- ящики: просто часть сцены ---------- */
 /* левая колонка: «пустые» ящики */
 const BOX_COLS = [
-  ...LEFT_ROWS_Y.map(y => ({ x:LEFT_COL.x, y:y - LEFT_COL.h/2, w:LEFT_COL.w, h:LEFT_COL.h })),
-  ...BOX_ROWS_Y.slice(2).map(y => ({ x:RIGHT_COL.x, y:y - RIGHT_COL.h/2, w:RIGHT_COL.w, h:RIGHT_COL.h }))
+  ...LEFT_ROWS_Y.slice(2).map(y => ({ x:LEFT_COL.x, y:y - LEFT_COL.h/2, w:LEFT_COL.w, h:LEFT_COL.h })),
+  ...BOX_ROWS_Y.slice(2).map(y => ({ x:RIGHT_COL.x + 14, y:y - RIGHT_COL.h/2, w:RIGHT_COL.w, h:RIGHT_COL.h }))
 ];
 BOX_COLS.forEach(r => {
   const el = mk('button', 'hs dead', r);

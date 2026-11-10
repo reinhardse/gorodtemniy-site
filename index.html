@@ -176,7 +176,7 @@ body.in #contact{opacity:1;pointer-events:auto}
 <main id="viewport" aria-label="Подъезд города Тёмный">
   <div id="scene">
     <canvas id="gl"></canvas>
-    <img id="bg" src="scene.jpg" alt="Подъезд с лифтом, почтовыми ящиками и стендом «Тёмный»" draggable="false">
+    <img id="bg" src="scene2.jpg" alt="Подъезд с лифтом, почтовыми ящиками и стендом «Тёмный»" draggable="false">
     <div id="lampglow" class="layer"></div>
     <div id="dim-spill" class="layer"></div>
     <div id="dim-core" class="layer"></div>
@@ -495,7 +495,7 @@ function parallaxFrame(){
   const go = () => { if (++n < 2) return;
     try { glr = initGL(si, di); if (!glr) return; setupDepth(di); sizeGL(); document.body.classList.add('gl'); }
     catch (_) { glr = null; document.body.classList.remove('gl'); } };
-  si.onload = di.onload = go; si.src = 'scene.jpg'; di.src = 'depth.png';
+  si.onload = di.onload = go; si.src = 'scene2.jpg'; di.src = 'depth.png';
 })();
 addEventListener('resize', sizeGL);
 

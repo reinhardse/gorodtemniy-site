@@ -11,7 +11,7 @@ html,body{height:100%;background:#040504;overflow:hidden;color:#e8dcc0;
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* ---------- gate ---------- */
-#gate{position:fixed;inset:0;z-index:50;background:#040504;display:flex;flex-direction:column;
+#gate{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at center,rgba(4,5,4,.55),rgba(4,5,4,.82));display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:34px;padding:32px;text-align:center;
   transition:opacity 1.6s ease,visibility 1.6s}
 #gate p{max-width:30ch;font-size:clamp(15px,2.4vw,20px);line-height:1.6;color:#b9ad8e;letter-spacing:.02em;
@@ -23,8 +23,7 @@ body.in #gate{opacity:0;visibility:hidden}
 @keyframes fadein{to{opacity:1}}
 
 /* ---------- scene ---------- */
-#viewport{position:fixed;inset:0;overflow:hidden;touch-action:none;opacity:0;transition:opacity 2.8s ease .3s}
-body.in #viewport{opacity:1}
+#viewport{position:fixed;inset:0;overflow:hidden;touch-action:none;opacity:1}
 #scene{position:absolute;left:0;top:0;will-change:transform}
 #gl{position:absolute;inset:0;width:100%;height:100%;display:none;pointer-events:none}
 body.gl #gl{display:block}
@@ -89,7 +88,7 @@ body.in #snd{opacity:1}
   box-shadow:0 10px 36px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,225,160,.14),inset 0 0 30px rgba(255,170,70,.05);
   backdrop-filter:blur(7px) saturate(.9);-webkit-backdrop-filter:blur(7px) saturate(.9);
   text-shadow:0 1px 3px rgba(0,0,0,.9);
-  opacity:0;pointer-events:none;transition:opacity 2s 3.2s}
+  opacity:0;pointer-events:none;transition:opacity 2s 24s}
 body.in #contact{opacity:1;pointer-events:auto}
 #contact::before,#contact::after{display:none}
 .c-org{display:none}

@@ -709,8 +709,8 @@ function flicker(){
 /* ---------- звук ---------- */
 let ac = null, master = null, muted = false;
 function startAudio(){
-  if (NOSOUND) return;
-  if (ac){ if (!muted && ac.state === 'suspended') ac.resume(); return; }   // первое касание будит контекст, если браузер усыпил его
+  if (NOSOUND || muted) return;
+  if (ac){ if (ac.state === 'suspended') ac.resume(); return; }   // первое касание будит контекст, если браузер усыпил его
   try {
     ac = new (window.AudioContext || window.webkitAudioContext)();
     master = ac.createGain(); master.gain.value = 0.25; master.connect(ac.destination);
@@ -741,12 +741,16 @@ function zap(){
   } catch (_) {}
 }
 $('#snd').addEventListener('click', e => {
-  if (!ac) { startAudio(); return; }
-  muted = !muted;
-  if (master){ const t = ac.currentTime; master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(muted ? 0 : 0.25, t); master.gain.value = muted ? 0 : 0.25; }
-  try { if (muted) ac.suspend(); else ac.resume(); } catch (_) {}   // выключено — контекст останавливается полностью
-  e.currentTarget.textContent = muted ? 'звук: выкл' : 'звук: вкл';
-  e.currentTarget.setAttribute('aria-pressed', String(muted));
+  const btn = e.currentTarget;
+  if (muted){                                   // включить: создаём звук заново
+    muted = false; startAudio();
+    btn.textContent = 'звук: вкл'; btn.setAttribute('aria-pressed', 'false');
+  } else if (ac){                               // выключить: полностью убиваем весь звук (гул, шум, треск)
+    muted = true;
+    const old = ac; ac = null; master = null;
+    try { old.close(); } catch (_) {}
+    btn.textContent = 'звук: выкл'; btn.setAttribute('aria-pressed', 'true');
+  } else { startAudio(); }
 });
 
 /* ---------- вход ---------- */

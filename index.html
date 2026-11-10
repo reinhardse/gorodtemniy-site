@@ -88,7 +88,7 @@ body.in #snd{opacity:1}
   box-shadow:0 10px 36px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,225,160,.14),inset 0 0 30px rgba(255,170,70,.05);
   backdrop-filter:blur(7px) saturate(.9);-webkit-backdrop-filter:blur(7px) saturate(.9);
   text-shadow:0 1px 3px rgba(0,0,0,.9);
-  opacity:0;pointer-events:none;transition:opacity 2s 24s}
+  opacity:0;pointer-events:none;transition:opacity 2s .6s}
 body.in #contact{opacity:1;pointer-events:auto}
 #contact::before,#contact::after{display:none}
 .c-org{display:none}
@@ -182,9 +182,8 @@ body.in #contact{opacity:1;pointer-events:auto}
 <div id="vig"></div>
 <div id="grain"></div>
 <div id="tip" role="tooltip"></div>
-<div id="hint"></div>
 <div id="toast" role="status" aria-live="polite"></div>
-<button id="snd" type="button" aria-pressed="false">звук: вкл</button>
+<button id="snd" type="button" aria-pressed="false">включить звук</button>
 
 <div id="modal" role="dialog" aria-modal="true" aria-label="Информация">
   <div class="card"><button class="x" type="button" aria-label="Закрыть">×</button><div id="modal-body"></div></div>
@@ -516,6 +515,7 @@ function flicker(){
 /* ---------- звук ---------- */
 let ac = null, master = null, muted = false;
 function startAudio(){
+  if (ac) return;
   try {
     ac = new (window.AudioContext || window.webkitAudioContext)();
     master = ac.createGain(); master.gain.value = 0.4; master.connect(ac.destination);
@@ -530,6 +530,8 @@ function startAudio(){
     let last = 0; for (let i = 0; i < len; i++){ const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2; }
     const ns = ac.createBufferSource(); ns.buffer = buf; ns.loop = true;
     const ng = ac.createGain(); ng.gain.value = 0.1; ns.connect(ng); ng.connect(master); ns.start();
+    ac.resume && ac.resume();
+    const sb = document.getElementById('snd'); if (sb) { sb.textContent = 'звук: вкл'; sb.setAttribute('aria-pressed','false'); }
   } catch (_) { ac = null; }
 }
 function zap(){
@@ -544,6 +546,7 @@ function zap(){
   } catch (_) {}
 }
 $('#snd').addEventListener('click', e => {
+  if (!ac) { startAudio(); return; }
   muted = !muted; if (master) master.gain.value = muted ? 0 : 0.4;
   e.currentTarget.textContent = muted ? 'звук: выкл' : 'звук: вкл';
   e.currentTarget.setAttribute('aria-pressed', String(muted));
@@ -558,10 +561,6 @@ function enterScene(){
   setTimeout(() => setDim(0), 980);
   setTimeout(flicker, 5200);
   setTimeout(() => { introDone = true; if (portrait() && !dragging) tx = focusX(0.79); }, 3600);
-  const hint = $('#hint');
-  hint.textContent = portrait() ? 'Проведите пальцем. Письма — в ящиках справа' : 'Каналы города слева. Письма — в ящиках справа';
-  setTimeout(() => hint.classList.add('on'), 3600);
-  setTimeout(() => hint.classList.remove('on'), 11000);
 }
 // звук стартует с первого касания/клика: браузер без этого не даёт играть аудио
 const firstGesture = () => { startAudio(); ['pointerdown','keydown','touchstart'].forEach(ev => document.removeEventListener(ev, firstGesture)); };

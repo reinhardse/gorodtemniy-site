@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Тёмный — Приёмная города</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#040504;overflow:hidden;color:#e8dcc0;
+  font-family:"Courier New",ui-monospace,Menlo,monospace;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* ---------- gate ---------- */
+#gate{position:fixed;inset:0;z-index:50;background:#040504;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:34px;padding:32px;text-align:center;
+  transition:opacity 1.6s ease,visibility 1.6s}
+#gate p{max-width:30ch;font-size:clamp(15px,2.4vw,20px);line-height:1.6;color:#b9ad8e;letter-spacing:.02em;
+  opacity:0;animation:fadein 2.4s .4s forwards}
+#enter{padding:14px 30px;border:1px solid #6d6347;color:#e8dcc0;letter-spacing:.18em;text-transform:uppercase;
+  font-size:13px;opacity:0;animation:fadein 2s 1.8s forwards;transition:background .3s,border-color .3s}
+#enter:hover,#enter:focus-visible{background:rgba(232,190,110,.1);border-color:#c9a45e;outline:none}
+body.in #gate{opacity:0;visibility:hidden}
+@keyframes fadein{to{opacity:1}}
+
+/* ---------- scene ---------- */
+#viewport{position:fixed;inset:0;overflow:hidden;touch-action:none;opacity:0;transition:opacity 2.8s ease .3s}
+body.in #viewport{opacity:1}
+#scene{position:absolute;left:0;top:0;will-change:transform}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:none;pointer-events:none}
+body.gl #gl{display:block}
+body.gl #bg{visibility:hidden}
+#bg{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.layer{position:absolute;pointer-events:none}
+#dim-core{background:#020302;opacity:0}
+#dim-spill{background:radial-gradient(ellipse 50% 50% at 50% 52%,rgba(2,3,2,.9),rgba(2,3,2,.5) 50%,rgba(2,3,2,0) 100%);opacity:0}
+#lampglow{background:radial-gradient(circle,rgba(255,196,110,.55) 0%,rgba(255,170,70,.18) 38%,rgba(255,160,60,0) 70%);
+  mix-blend-mode:screen;animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.55}50%{opacity:.85}}
+#floorlight{background:radial-gradient(ellipse 50% 40% at 50% 0%,rgba(255,150,50,.28),rgba(255,150,50,0) 100%);mix-blend-mode:screen;opacity:1}
+
+#indicator{position:absolute;background:#0d0706;display:flex;align-items:center;justify-content:center;
+  color:#e8321d;font-weight:400;opacity:.88;text-shadow:0 0 4px rgba(255,60,30,.8),0 0 10px rgba(255,40,20,.35);
+  pointer-events:none;overflow:hidden;letter-spacing:.06em}
+
+/* hotspots */
+.hs{position:absolute;display:block;cursor:pointer;border-radius:2px;outline:none;
+  transition:box-shadow .25s,background .25s}
+.hs:hover,.hs:focus-visible{background:rgba(255,196,110,.09);box-shadow:inset 0 0 0 1px rgba(255,205,130,.55),0 0 18px rgba(255,180,80,.25)}
+.hs.dead{cursor:default}
+.hs.dead:hover{background:rgba(255,196,110,.03);box-shadow:none}
+.hs .ic{position:absolute;right:9%;top:50%;transform:translateY(-50%);height:72%;aspect-ratio:1;
+  color:rgba(238,226,196,.78);filter:drop-shadow(0 1px 0 rgba(0,0,0,.6));transition:color .25s,filter .25s}
+.hs:hover .ic,.hs:focus-visible .ic{color:#ffd898;filter:drop-shadow(0 0 5px rgba(255,190,90,.9))}
+.hs.soon .ic{opacity:.45}
+.hs svg{width:100%;height:100%;display:block}
+
+/* atmosphere */
+#vig{position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 75% at 50% 50%,rgba(0,0,0,0) 40%,rgba(0,0,0,.62) 100%)}
+#grain{position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;opacity:.09;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grain .9s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+
+/* ui */
+#tip{position:fixed;z-index:20;pointer-events:none;padding:7px 11px;background:rgba(10,9,6,.88);
+  border:1px solid rgba(201,164,94,.45);color:#f0e2bd;font-size:13px;letter-spacing:.03em;opacity:0;
+  transform:translate(14px,14px);transition:opacity .15s;white-space:nowrap}
+#tip small{display:block;color:#a99d7c;font-size:11px;margin-top:2px}
+#tip.on{opacity:1}
+#hint{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));text-align:center;z-index:10;
+  color:#c8b98f;font-size:13px;letter-spacing:.12em;text-transform:uppercase;pointer-events:none;opacity:0;
+  text-shadow:0 1px 8px #000,0 0 2px #000;transition:opacity 1.6s}
+#hint.on{opacity:.9}
+#toast{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;
+  max-width:min(88vw,420px);padding:12px 18px;background:rgba(10,9,6,.92);border:1px solid rgba(201,164,94,.4);
+  color:#eadfc0;font-size:14px;line-height:1.5;text-align:center;opacity:0;pointer-events:none;transition:opacity .4s}
+#toast.on{opacity:1}
+#snd{position:fixed;left:16px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:15;padding:8px 10px;
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8d8366;opacity:0;transition:opacity 2s 2s,color .2s}
+body.in #snd{opacity:1}
+#snd:hover,#snd:focus-visible{color:#e8dcc0;outline:none}
+
+/* contact: тёмная стеклянная панель, внутри — плитки соцсетей */
+#contact{position:fixed;z-index:12;left:clamp(18px,3.4vw,52px);top:50%;transform:translateY(-50%);width:min(264px,31vw);
+  padding:16px 14px 14px;color:#d9cca3;border-radius:4px;
+  background:linear-gradient(180deg,rgba(24,20,12,.52),rgba(8,7,4,.62));
+  border:1px solid rgba(255,220,150,.2);
+  box-shadow:0 10px 36px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,225,160,.14),inset 0 0 30px rgba(255,170,70,.05);
+  backdrop-filter:blur(7px) saturate(.9);-webkit-backdrop-filter:blur(7px) saturate(.9);
+  text-shadow:0 1px 3px rgba(0,0,0,.9);
+  opacity:0;pointer-events:none;transition:opacity 2s 3.2s}
+body.in #contact{opacity:1;pointer-events:auto}
+#contact::before,#contact::after{display:none}
+.c-org{display:none}
+.c-title{margin:0 0 12px;font-size:13px;line-height:1.2;font-weight:400;letter-spacing:.28em;text-transform:uppercase;text-align:center;color:#e6d9ae;
+  animation:cflick 7s infinite}
+.c-rule{display:none}
+#c-list{display:grid;gap:8px}
+.c-btn{display:flex;align-items:center;gap:12px;width:100%;padding:8px 10px 8px 8px;margin:0;text-align:left;color:#d9cca3;text-decoration:none;
+  background:rgba(255,230,170,.06);border:1px solid rgba(255,220,150,.16);border-radius:3px;cursor:pointer;font:inherit;
+  transition:background .25s,border-color .25s,color .25s,box-shadow .25s,transform .25s}
+.c-btn svg{width:22px;height:22px;flex:none;box-sizing:content-box;padding:8px;border-radius:3px;background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,220,150,.18);color:#e6d9ae}
+.c-btn .n{font-size:13px;letter-spacing:.14em;text-transform:uppercase;display:block}
+.c-btn .l{display:none}
+.c-btn .h{display:block;font-size:11px;letter-spacing:.04em;opacity:.6;margin-top:2px}
+.c-btn .tx{display:flex;flex-direction:column;min-width:0}
+.c-btn:hover,.c-btn:focus-visible{outline:none;color:#fff1c4;background:rgba(255,190,100,.14);border-color:rgba(255,205,130,.6);
+  box-shadow:0 0 18px rgba(255,180,80,.28);transform:translateX(3px)}
+.c-btn:hover svg{border-color:rgba(255,205,130,.7);color:#fff1c4}
+@keyframes cflick{0%,93%,100%{opacity:1}94%{opacity:.55}95%{opacity:1}96.5%{opacity:.7}97%{opacity:1}}
+@media(max-width:760px),(orientation:portrait){
+  #contact{left:50%;top:auto;bottom:calc(44px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(94vw,440px);padding:10px 8px 8px}
+  
+  .c-org{display:none}.c-title{font-size:11px;margin:0 0 8px}
+  #c-list{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .c-btn{flex-direction:column;align-items:center;gap:4px;padding:6px 0 5px;text-align:center}
+  .c-btn svg{width:18px;height:18px;padding:6px}.c-btn .n{font-size:8.5px;letter-spacing:.04em;font-weight:700}.c-btn .l,.c-btn .h{display:none}.c-btn .tx{align-items:center}
+  #hint{bottom:calc(168px + env(safe-area-inset-bottom))}
+}
+/* mailbox: письма, торчащие из щелей */
+.hs .tag{position:absolute;left:4%;right:4%;top:-6%;height:112%;transform:rotate(-1.4deg);pointer-events:none;
+  display:flex;align-items:center;gap:calc(var(--u,1px)*7);padding:0 calc(var(--u,1px)*8) 0 calc(var(--u,1px)*9);
+  background:linear-gradient(180deg,#e9dfc0,#cdc29c);color:#2a2517;box-shadow:0 2px 5px rgba(0,0,0,.65);
+  font-size:calc(var(--u,1px)*11.5);line-height:1.05;letter-spacing:.03em;text-transform:uppercase;transition:background .25s,transform .25s}
+.hs .tag.b{transform:rotate(1.2deg)}
+.hs .tag::before{content:"";position:absolute;left:0;right:0;top:0;height:46%;
+  background:linear-gradient(170deg,rgba(0,0,0,.0) 49%,rgba(60,45,20,.28) 50%);clip-path:polygon(0 0,100% 0,50% 100%);opacity:.55}
+.hs .tag .st{flex:none;width:calc(var(--u,1px)*20);height:calc(var(--u,1px)*20);border:1.5px dashed #6b1d12;color:#6b1d12;
+  display:grid;place-items:center;background:rgba(160,40,25,.08);position:relative}
+.hs .tag .st svg{width:70%;height:70%}
+.hs .tag b{display:block;font-size:1.22em;letter-spacing:.06em;position:relative}
+.hs .tag i{font-style:normal;opacity:.75;display:block;font-size:.8em;position:relative}
+.hs:hover .tag,.hs:focus-visible .tag{background:linear-gradient(180deg,#fbeec0,#e6d6a2);color:#000;transform:rotate(0deg) translateY(-2px)}
+.hdr-note{position:absolute;pointer-events:none;transform:rotate(-1deg);background:#d8d0b0;color:#2a2517;text-align:center;
+  font-size:calc(var(--u,1px)*12.5);letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.6)}
+/* modal */
+#modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(2,2,1,.72);backdrop-filter:blur(2px)}
+#modal.on{display:flex;animation:fadein .35s forwards}
+#modal .card{position:relative;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:30px 32px 32px;
+  background:#cfc7a8;color:#1c1a14;box-shadow:0 24px 80px rgba(0,0,0,.7),inset 0 0 60px rgba(90,70,30,.35);
+  border:1px solid #8c8158}
+#modal .x{position:absolute;right:10px;top:8px;width:36px;height:36px;font-size:22px;color:#4a4330}
+#modal .x:hover{color:#000}
+.org{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#5b5238;margin-bottom:14px}
+.about{display:grid;grid-template-columns:200px 1fr;gap:26px;align-items:start}
+.about img{width:100%;display:block;border:3px solid #6f6647;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.about h2{font-size:26px;letter-spacing:.04em;margin-bottom:6px}
+.about .tag{font-size:15px;font-weight:700;margin-bottom:14px;color:#6b1d12}
+.about p{font-size:15px;line-height:1.65}
+.mailcard{text-align:center}
+.mailcard h2{font-size:22px;margin-bottom:12px}
+.mailcard .addr{display:inline-block;margin:10px 0 18px;padding:10px 16px;border:1px dashed #6f6647;
+  font-size:18px;user-select:all;background:rgba(255,255,255,.25)}
+.mailcard .btn{display:inline-block;padding:10px 20px;border:1px solid #1c1a14;font-size:13px;letter-spacing:.14em;
+  text-transform:uppercase}
+.mailcard .btn:hover{background:#1c1a14;color:#cfc7a8}
+.mailcard p{font-size:14px;line-height:1.6;color:#3b3626}
+@media(max-width:640px){.about{grid-template-columns:1fr}.about img{max-width:180px}#modal .card{padding:26px 20px 24px}}
+@media(prefers-reduced-motion:reduce){#grain,#lampglow{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <p>Если вы сейчас слышите этот эфир — надежды больше нет.</p>
+  <button id="enter" type="button">Войти в подъезд</button>
+</div>
+
+<main id="viewport" aria-label="Подъезд города Тёмный">
+  <div id="scene">
+    <canvas id="gl"></canvas>
+    <img id="bg" src="scene.jpg" alt="Подъезд с лифтом, почтовыми ящиками и стендом «Тёмный»" draggable="false">
+    <div id="floorlight" class="layer"></div>
+    <div id="lampglow" class="layer"></div>
+    <div id="dim-spill" class="layer"></div>
+    <div id="dim-core" class="layer"></div>
+    <div id="indicator"><span id="digit">1</span></div>
+  </div>
+</main>
+
+<aside id="contact" aria-label="Каналы города"><div class="c-title">Следить за городом</div><div class="c-rule"></div><div id="c-list"></div></aside>
+<div id="vig"></div>
+<div id="grain"></div>
+<div id="tip" role="tooltip"></div>
+<div id="hint"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<button id="snd" type="button" aria-pressed="false">звук: вкл</button>
+
+<div id="modal" role="dialog" aria-modal="true" aria-label="Информация">
+  <div class="card"><button class="x" type="button" aria-label="Закрыть">×</button><div id="modal-body"></div></div>
+</div>
+
+<script>
+/* =========================================================
+   НАСТРОЙКИ. Ссылки меняются здесь: href: null = «скоро».
+   Координаты — в пикселях исходной картинки 1670×942.
+   ========================================================= */
+const IW = 1670, IH = 942;
+
+const BOX_ROWS_Y = [473, 516, 558, 601, 643, 686];      // центры строк правой колонки
+const RIGHT_COL  = { x:1322, w:168, h:38 };
+const LEFT_ROWS_Y = [474, 511, 547, 588, 627, 666];     // левая колонка — «пустые» ящики
+const LEFT_COL   = { x:1162, w:140, h:34 };
+const STAND = { x:1245, y:208, w:203, h:202 };
+const LIFT  = { x:712,  y:255, w:160, h:687 };          // проём лифта
+const INDIC = { x:806,  y:137, w:98,  h:73  };
+const LAMP  = { cx:1565, cy:80, r:150 };
+
+const EMPTY_LINES = [
+  'Пусто.',
+  'Здесь давно никто не живёт.',
+  'Письмо адресовано вам. Вы его не получите.',
+  'Ящик закрыт. Он помнит, кто его открывал.',
+  'Внутри что-то шевельнулось. Показалось.'
+];
+const ABOUT = 'В лесу замечены отголоски Сияния. В город приходят паломники и единороги. В 14:44 был контакт с НЛО. Река начала вести себя иначе, а стены знают слишком много. Что-то вламывается в дома, предоставлена инструкция на случай визита мёртвых. Туман трогает прохожих. А у жителей возникает вопрос: сколько стоит надежда и почему часы идут в обратную сторону.';
+
+/* ---------- DOM ---------- */
+const $ = s => document.querySelector(s);
+const scene = $('#scene'), viewport = $('#viewport'), tip = $('#tip'), toastEl = $('#toast');
+const pct = (v, t) => (v / t * 100) + '%';
+function place(el, r){
+  el.style.left = pct(r.x, IW); el.style.top = pct(r.y, IH);
+  el.style.width = pct(r.w, IW); el.style.height = pct(r.h, IH);
+  el._r = r;
+}
+function mk(tag, cls, r, parent){
+  const el = document.createElement(tag); if (cls) el.className = cls; place(el, r); (parent || scene).appendChild(el); return el;
+}
+
+place($('#dim-core'),  { x:LIFT.x-1, y:236, w:LIFT.w+2, h:IH-236 });
+place($('#dim-spill'), { x:LIFT.x-80, y:LIFT.y-110, w:LIFT.w+160, h:LIFT.h+110 });
+place($('#floorlight'),{ x:LIFT.x-60, y:IH-70, w:LIFT.w+120, h:70 });
+place($('#lampglow'),  { x:LAMP.cx-LAMP.r, y:LAMP.cy-LAMP.r, w:LAMP.r*2, h:LAMP.r*2 });
+place($('#indicator'), INDIC);
+
+/* ---------- подсказка / тост ---------- */
+function showTip(html, e){ tip.innerHTML = html; tip.classList.add('on'); moveTip(e); }
+function moveTip(e){
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX, y = e.clientY;
+  if (x + w + 30 > innerWidth) x = innerWidth - w - 30;
+  if (y + h + 30 > innerHeight) y = innerHeight - h - 30;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.classList.remove('on'); }
+let toastT;
+function toast(msg){
+  toastEl.textContent = msg; toastEl.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 3200);
+}
+function bindTip(el, html){
+  el.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showTip(html, e); });
+  el.addEventListener('pointermove',  e => { if (e.pointerType === 'mouse') moveTip(e); });
+  el.addEventListener('pointerleave', hideTip);
+  el.addEventListener('focus', () => { const r = el.getBoundingClientRect(); showTip(html, {clientX:r.left, clientY:r.bottom}); });
+  el.addEventListener('blur', hideTip);
+}
+
+/* ---------- модальное окно ---------- */
+const modal = $('#modal'), modalBody = $('#modal-body');
+let lastFocus = null;
+function openModal(html){
+  lastFocus = document.activeElement; modalBody.innerHTML = html; modal.classList.add('on'); hideTip();
+  modal.querySelector('.x').focus();
+}
+function closeModal(){ modal.classList.remove('on'); if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+modal.addEventListener('click', e => { if (e.target === modal || e.target.closest('.x')) closeModal(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ---------- почта (окно с адресом) ---------- */
+const MAIL = 'gorodtemniy@gmail.com';
+function openMail(){
+  openModal('<div class="mailcard"><div class="org">Администрация города Тёмный</div><h2>Приёмная города</h2>' +
+    '<p>Жалобы, наблюдения, свидетельства о Сиянии и всё, что вы не смогли объяснить, присылайте сюда.</p>' +
+    '<div class="addr">' + MAIL + '</div><br><button class="btn" type="button" id="copymail">Скопировать адрес</button></div>');
+  $('#copymail').addEventListener('click', async ev => {
+    try { await navigator.clipboard.writeText(MAIL); ev.target.textContent = 'Скопировано'; }
+    catch (_) { ev.target.textContent = 'Выделите адрес и скопируйте'; }
+  });
+}
+
+/* ---------- левая панель: каналы города (по порядку) ---------- */
+const SOC_ICONS = {
+  yt:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.2c-.2-.9-.9-1.6-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4c-.9.2-1.6.9-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.8c.2.9.9 1.6 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4c.9-.2 1.6-.9 1.8-1.8.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3z"/></svg>',
+  ig:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>',
+  tt:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3.5v10.8a3.6 3.6 0 1 1-3.1-3.56"/><path d="M14 3.5c.35 2.4 1.9 4 4.6 4.3"/></svg>',
+  vk:  '<svg viewBox="0 0 24 24"><text x="12" y="16.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="800" font-size="13" fill="currentColor">VK</text></svg>',
+  tg:  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.2 11.3 20.4 4.6c.8-.3 1.5.2 1.2 1.3l-2.9 13.6c-.2 1-.8 1.2-1.6.8l-4.4-3.3-2.1 2.1c-.2.2-.4.4-.9.4l.3-4.5 8.2-7.4c.4-.3-.1-.5-.6-.2L7.5 13.1l-4.3-1.4c-.9-.3-.9-.9.2-1.3z"/></svg>'
+};
+const SOCIALS = [
+  { icon:'yt', name:'YouTube',   sub:'@gorodtemny', href:'https://www.youtube.com/@gorodtemny' },
+  { icon:'ig', name:'Instagram', sub:'@gorodtemny', href:'https://www.instagram.com/gorodtemny' },
+  { icon:'tt', name:'TikTok',    sub:'@gorodtemny', href:'https://www.tiktok.com/@gorodtemny' },
+  { icon:'vk', name:'ВКонтакте', sub:'@gorodtemny', href:'https://vk.ru/gorodtemny' },
+  { icon:'tg', name:'Telegram',  sub:'@gorodtemny', href:'https://t.me/gorodtemny' }
+];
+SOCIALS.forEach(c => {
+  const el = document.createElement(c.href ? 'a' : 'button');
+  el.className = 'c-btn' + (c.href ? '' : ' soon');
+  if (c.href){ el.href = c.href; el.target = '_blank'; el.rel = 'noopener noreferrer'; } else { el.type = 'button'; }
+  el.innerHTML = SOC_ICONS[c.icon] + '<span class="tx"><span class="n">' + c.name + '</span><span class="h">' + (c.sub || 'скоро') + '</span></span>';
+  if (!c.href) el.addEventListener('click', () => toast(c.name + ': окно ещё занавешено. Скоро откроется.'));
+  $('#c-list').appendChild(el);
+});
+
+/* ---------- правые ящики: два рабочих — Telegram и Почта ---------- */
+const IC_TG='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 3.5 2.8 10.7c-.9.4-.9 1.1-.2 1.3l4.7 1.5 1.8 5.5c.2.6.4.7.9.3l2.6-2.1 4.8 3.5c.9.5 1.5.2 1.7-.8l3-16.4c.3-1.2-.4-1.7-1.6-1.2zM8 13l9.3-5.9c.4-.3.8-.1.5.2L10 14.2l-.3 3.3z"/></svg>';
+const IC_ML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 7 9-7"/></svg>';
+function labelBox(i, cls, title, sub, icon, tipHtml, make){
+  const r = { x:RIGHT_COL.x, y:BOX_ROWS_Y[i] - RIGHT_COL.h/2, w:RIGHT_COL.w, h:RIGHT_COL.h };
+  const el = make(r); el.setAttribute('aria-label', 'Написать нам: ' + title);
+  const t = document.createElement('span'); t.className = 'tag ' + cls;
+  t.innerHTML = '<span class="st">'+icon+'</span><span><b>'+title+'</b><i>'+sub+'</i></span>';
+  el.appendChild(t); bindTip(el, tipHtml); return el;
+}
+labelBox(0, 'a', 'Telegram', 'написать нам', IC_TG, 'Свяжитесь с нами<small>Telegram @gorodtemny</small>', r => {
+  const el = mk('a', 'hs', r); el.href = 'https://t.me/gorodtemny'; el.target = '_blank'; el.rel = 'noopener noreferrer'; return el; });
+labelBox(1, 'b', 'Почта', 'написать письмо', IC_ML, 'Свяжитесь с нами<small>gorodtemniy@gmail.com</small>', r => {
+  const el = mk('button', 'hs', r); el.type = 'button'; el.addEventListener('click', () => { if (!dragged) openMail(); }); return el; });
+{ const h = mk('div','hdr-note',{x:RIGHT_COL.x-6,y:BOX_ROWS_Y[0]-RIGHT_COL.h/2-34,w:RIGHT_COL.w+6,h:22}); h.textContent='Свяжитесь с нами'; }
+
+/* ---------- ящики: просто часть сцены ---------- */
+/* левая колонка: «пустые» ящики */
+const BOX_COLS = [
+  ...LEFT_ROWS_Y.map(y => ({ x:LEFT_COL.x, y:y - LEFT_COL.h/2, w:LEFT_COL.w, h:LEFT_COL.h })),
+  ...BOX_ROWS_Y.slice(2).map(y => ({ x:RIGHT_COL.x, y:y - RIGHT_COL.h/2, w:RIGHT_COL.w, h:RIGHT_COL.h }))
+];
+BOX_COLS.forEach(r => {
+  const el = mk('button', 'hs dead', r);
+  el.type = 'button'; el.setAttribute('aria-label', 'Почтовый ящик');
+  el.addEventListener('click', () => { if (!dragged) toast(EMPTY_LINES[Math.floor(Math.random() * EMPTY_LINES.length)]); });
+});
+
+/* стенд */
+const stand = mk('button', 'hs', STAND); stand.type = 'button'; stand.setAttribute('aria-label', 'О городе');
+bindTip(stand, 'О городе<small>информационный стенд</small>');
+stand.addEventListener('click', () => {
+  if (dragged) return;
+  openModal('<div class="org">Администрация города Тёмный · Информационный стенд</div>' +
+    '<div class="about"><img src="logo.jpg" alt="Логотип «Тёмный»"><div><h2>Тёмный</h2>' +
+    '<div class="tag">Город, в котором был каждый.</div><p>' + ABOUT + '</p></div></div>');
+});
+
+/* лифт */
+const lift = mk('button', 'hs', LIFT); lift.type = 'button'; lift.setAttribute('aria-label', 'Лифт');
+bindTip(lift, 'Лифт');
+lift.addEventListener('click', () => { if (!dragged) { toast('Лифт не работает. Вы же не собираетесь туда заходить?'); zap(); } });
+
+/* ---------- раскладка и панорама ---------- */
+let W = 0, H = 0, vw = 0, vh = 0, minX = 0, minY = 0;
+let cx = 0, cy = 0, tx = 0, ty = 0;
+let mode = 'mouse';
+function layout(){
+  vw = innerWidth; vh = innerHeight;
+  const s = Math.max(vw / IW, vh / IH) * 1.06;
+  W = IW * s; H = IH * s;
+  scene.style.width = W + 'px'; scene.style.height = H + 'px'; scene.style.setProperty('--u', (W / IW) + 'px');
+  minX = Math.min(0, vw - W); minY = Math.min(0, vh - H);
+  if (portrait()) { tx = focusX(introDone ? 0.79 : 0.50); ty = minY / 2; }
+  else { tx = minX / 2; ty = minY / 2; }
+  if (!cx && !cy) { cx = tx; cy = ty; }
+}
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+let introDone = false;
+const focusX = f => clamp(vw / 2 - f * W, minX, 0);
+const portrait = () => W - vw > vw * 0.5;
+addEventListener('resize', layout);
+layout();
+
+/* мышь: взгляд следует за курсором */
+addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || dragging || portrait()) return;
+  const nx = e.clientX / vw - 0.5, ny = e.clientY / vh - 0.5;
+  tx = minX / 2 + nx * minX * 0.55;     // minX отрицательный
+  ty = minY / 2 + ny * minY * 0.55;
+});
+/* касание/перетаскивание */
+let dragging = false, dragged = false, sx = 0, sy = 0, stx = 0, sty = 0;
+viewport.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && !portrait()) return;
+  dragging = true; dragged = false; sx = e.clientX; sy = e.clientY; stx = tx; sty = ty;
+});
+addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - sx, dy = e.clientY - sy;
+  if (Math.abs(dx) + Math.abs(dy) > 8) dragged = true;
+  tx = clamp(stx + dx, minX, 0); ty = clamp(sty + dy, minY, 0);
+});
+addEventListener('pointerup', () => { dragging = false; setTimeout(() => { dragged = false; }, 60); });
+addEventListener('pointercancel', () => { dragging = false; });
+viewport.addEventListener('click', e => { if (dragged) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+
+/* ---------- объём: карта глубины + WebGL ---------- */
+const STR = 0.024;                    // сила параллакса (доля ширины картинки)
+let lookX = 0, lookY = 0, tlx = 0, tly = 0, lastMouse = -1e9;
+let glr = null, anchors = [];
+addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  tlx = (e.clientX / vw - 0.5) * 2; tly = (e.clientY / vh - 0.5) * 2; lastMouse = performance.now();
+});
+
+function initGL(sceneImg, depthImg){
+  const cv = $('#gl');
+  const gl = cv.getContext('webgl', { antialias:false, alpha:false });
+  if (!gl) return null;
+  const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,1.-(a.y*.5+.5));gl_Position=vec4(a,0.,1.);}';
+  const fs = 'precision highp float;varying vec2 v;uniform sampler2D t,d;uniform vec2 o;' +
+    'void main(){vec2 p=v;for(int i=0;i<5;i++){float z=texture2D(d,p).r;p=v+o*(z-.5);}' +
+    'gl_FragColor=texture2D(t,clamp(p,vec2(0.),vec2(1.)));}';
+  const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x);
+    if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(x)); return x; };
+  const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(pr); if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error('link');
+  gl.useProgram(pr);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const tex = (unit, img) => { const x = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, x);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); };
+  tex(0, sceneImg); tex(1, depthImg);
+  gl.uniform1i(gl.getUniformLocation(pr, 't'), 0); gl.uniform1i(gl.getUniformLocation(pr, 'd'), 1);
+  return { gl, cv, uo: gl.getUniformLocation(pr, 'o') };
+}
+function sizeGL(){
+  if (!glr) return;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const w = Math.min(Math.round(W * dpr), 2400), h = Math.round(w * H / W);
+  if (glr.cv.width !== w || glr.cv.height !== h){ glr.cv.width = w; glr.cv.height = h; glr.gl.viewport(0, 0, w, h); }
+}
+function setupDepth(depthImg){
+  const c = document.createElement('canvas'); c.width = depthImg.naturalWidth; c.height = depthImg.naturalHeight;
+  const x = c.getContext('2d', { willReadFrequently:true }); x.drawImage(depthImg, 0, 0);
+  const k = c.width / IW;
+  anchors = [...scene.querySelectorAll('*')].filter(e => e._r).map(e => {
+    const r = e._r, px = Math.round((r.x + r.w / 2) * k), py = Math.round((r.y + r.h / 2) * k);
+    let sum = 0, n = 0;
+    for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++){
+      const qx = Math.min(c.width - 1, Math.max(0, px + dx)), qy = Math.min(c.height - 1, Math.max(0, py + dy));
+      sum += x.getImageData(qx, qy, 1, 1).data[0]; n++;
+    }
+    return { el:e, d:sum / n / 255 };
+  });
+}
+function parallaxFrame(){
+  const now = performance.now(), t = now / 1000;
+  const idle = (now - lastMouse > 2500) || portrait();
+  const gx = idle ? Math.sin(t * 0.45) * 0.6 : tlx;
+  const gy = idle ? Math.sin(t * 0.31) * 0.3 : tly * 0.5;
+  lookX += (gx - lookX) * 0.05; lookY += (gy - lookY) * 0.05;
+  const ox = lookX * STR, oy = lookY * STR * (W / H);
+  if (glr){ glr.gl.uniform2f(glr.uo, ox, oy); glr.gl.drawArrays(glr.gl.TRIANGLE_STRIP, 0, 4); }
+  if (document.body.classList.contains('gl')){
+    for (const a of anchors){
+      const k = a.d - 0.5;
+      a.el.style.transform = 'translate3d(' + (-ox * k * W).toFixed(2) + 'px,' + (-oy * k * H).toFixed(2) + 'px,0)';
+    }
+  }
+}
+(function loadVolume(){
+  const si = new Image(), di = new Image(); let n = 0;
+  const go = () => { if (++n < 2) return;
+    try { glr = initGL(si, di); if (!glr) return; setupDepth(di); sizeGL(); document.body.classList.add('gl'); }
+    catch (_) { glr = null; document.body.classList.remove('gl'); } };
+  si.onload = di.onload = go; si.src = 'scene.jpg'; di.src = 'depth.png';
+})();
+addEventListener('resize', sizeGL);
+
+(function loop(){
+  cx += (tx - cx) * 0.07; cy += (ty - cy) * 0.07;
+  scene.style.transform = 'translate3d(' + cx.toFixed(2) + 'px,' + cy.toFixed(2) + 'px,0)';
+  parallaxFrame();
+  requestAnimationFrame(loop);
+})();
+
+/* ---------- индикатор над лифтом ---------- */
+const ind = $('#indicator'), digit = $('#digit');
+function fitIndicator(){ ind.style.fontSize = (ind.clientHeight * 0.6) + 'px'; }
+fitIndicator(); addEventListener('resize', fitIndicator);
+const SEQ = ['1','1','1','1','0','1','1','-1','1','1','4:44','1','1','1','0'];
+let si = 0;
+(function tickIndicator(){
+  si = (si + 1) % SEQ.length; digit.textContent = SEQ[si];
+  ind.style.fontSize = (ind.clientHeight * (SEQ[si].length > 2 ? 0.42 : 0.6)) + 'px';
+  setTimeout(tickIndicator, 2200 + Math.random() * 4200);
+})();
+
+/* ---------- мерцание лампы в кабине ---------- */
+const dimCore = $('#dim-core'), dimSpill = $('#dim-spill'), lampG = $('#lampglow');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function setDim(v){ dimCore.style.opacity = v; dimSpill.style.opacity = v * 0.55; }
+function flicker(){
+  if (reduce) { setTimeout(flicker, 9000); return; }
+  const burst = Math.random() < 0.4;
+  const n = burst ? 2 + Math.floor(Math.random() * 4) : 1;
+  const longDark = Math.random() < 0.12;      // редко: лампа почти гаснет на секунду
+  let t = 0;
+  for (let i = 0; i < n; i++){
+    const dip = 0.5 + Math.random() * 0.4;
+    setTimeout(() => { setDim(dip); zap(); }, t);
+    t += 35 + Math.random() * 90;
+    setTimeout(() => setDim(0.05 + Math.random() * 0.2), t);
+    t += 30 + Math.random() * 110;
+  }
+  if (longDark){
+    setTimeout(() => { setDim(0.92); }, t); t += 500 + Math.random() * 700;
+    setTimeout(() => { setDim(0.4); zap(); }, t); t += 80;
+  }
+  setTimeout(() => setDim(0), t + 40);
+  setTimeout(flicker, t + 1600 + Math.random() * 5200);
+}
+
+/* ---------- звук ---------- */
+let ac = null, master = null, muted = false;
+function startAudio(){
+  try {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain(); master.gain.value = 0.9; master.connect(ac.destination);
+    // низкий гул
+    const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 50;
+    const o2 = ac.createOscillator(); o2.type = 'square'; o2.frequency.value = 100.4;
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 260;
+    const g = ac.createGain(); g.gain.value = 0.012;
+    o.connect(lp); o2.connect(lp); lp.connect(g); g.connect(master); o.start(); o2.start();
+    // тихий шум помещения
+    const len = ac.sampleRate * 2, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    let last = 0; for (let i = 0; i < len; i++){ const w = Math.random() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.2; }
+    const ns = ac.createBufferSource(); ns.buffer = buf; ns.loop = true;
+    const ng = ac.createGain(); ng.gain.value = 0.18; ns.connect(ng); ng.connect(master); ns.start();
+  } catch (_) { ac = null; }
+}
+function zap(){
+  if (!ac || muted) return;
+  try {
+    const len = Math.floor(ac.sampleRate * 0.09), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+    const s = ac.createBufferSource(); s.buffer = buf;
+    const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800 + Math.random() * 2500; bp.Q.value = 0.9;
+    const g = ac.createGain(); g.gain.value = 0.22;
+    s.connect(bp); bp.connect(g); g.connect(master); s.start();
+  } catch (_) {}
+}
+$('#snd').addEventListener('click', e => {
+  muted = !muted; if (master) master.gain.value = muted ? 0 : 0.9;
+  e.currentTarget.textContent = muted ? 'звук: выкл' : 'звук: вкл';
+  e.currentTarget.setAttribute('aria-pressed', String(muted));
+});
+
+/* ---------- вход ---------- */
+$('#enter').addEventListener('click', () => {
+  startAudio();
+  document.body.classList.add('in');
+  setTimeout(() => setDim(0.85), 600);
+  setTimeout(() => { setDim(0.1); zap(); }, 760);
+  setTimeout(() => { setDim(0.7); zap(); }, 900);
+  setTimeout(() => setDim(0), 980);
+  setTimeout(flicker, 5200);
+  setTimeout(() => { introDone = true; if (portrait() && !dragging) tx = focusX(0.79); }, 3600);
+  const hint = $('#hint');
+  hint.textContent = portrait() ? 'Проведите пальцем. Письма — в ящиках справа' : 'Каналы города слева. Письма — в ящиках справа';
+  setTimeout(() => hint.classList.add('on'), 3600);
+  setTimeout(() => hint.classList.remove('on'), 11000);
+});
+</script>
+</body>
+</html>

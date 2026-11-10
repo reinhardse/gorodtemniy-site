@@ -11,7 +11,7 @@ html,body{height:100%;background:#040504;overflow:hidden;color:#e8dcc0;
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* ---------- gate ---------- */
-#gate{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at center,rgba(4,5,4,.55),rgba(4,5,4,.82));display:flex;flex-direction:column;
+#gate-unused{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at center,rgba(4,5,4,.55),rgba(4,5,4,.82));display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:34px;padding:32px;text-align:center;
   transition:opacity 1.6s ease,visibility 1.6s}
 #gate p{max-width:30ch;font-size:clamp(15px,2.4vw,20px);line-height:1.6;color:#b9ad8e;letter-spacing:.02em;
@@ -19,7 +19,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 #enter{padding:14px 30px;border:1px solid #6d6347;color:#e8dcc0;letter-spacing:.18em;text-transform:uppercase;
   font-size:13px;opacity:0;animation:fadein 2s 1.8s forwards;transition:background .3s,border-color .3s}
 #enter:hover,#enter:focus-visible{background:rgba(232,190,110,.1);border-color:#c9a45e;outline:none}
-body.in #gate{opacity:0;visibility:hidden}
+body.in #gate-unused{opacity:0;visibility:hidden}
 @keyframes fadein{to{opacity:1}}
 
 /* ---------- scene ---------- */
@@ -164,10 +164,7 @@ body.in #contact{opacity:1;pointer-events:auto}
 </head>
 <body>
 
-<div id="gate">
-  <p>Если вы сейчас слышите этот эфир — надежды больше нет.</p>
-  <button id="enter" type="button">Войти в подъезд</button>
-</div>
+
 
 <main id="viewport" aria-label="Подъезд города Тёмный">
   <div id="scene">
@@ -553,8 +550,7 @@ $('#snd').addEventListener('click', e => {
 });
 
 /* ---------- вход ---------- */
-$('#enter').addEventListener('click', () => {
-  startAudio();
+function enterScene(){
   document.body.classList.add('in');
   setTimeout(() => setDim(0.85), 600);
   setTimeout(() => { setDim(0.1); zap(); }, 760);
@@ -566,7 +562,11 @@ $('#enter').addEventListener('click', () => {
   hint.textContent = portrait() ? 'Проведите пальцем. Письма — в ящиках справа' : 'Каналы города слева. Письма — в ящиках справа';
   setTimeout(() => hint.classList.add('on'), 3600);
   setTimeout(() => hint.classList.remove('on'), 11000);
-});
+}
+// звук стартует с первого касания/клика: браузер без этого не даёт играть аудио
+const firstGesture = () => { startAudio(); ['pointerdown','keydown','touchstart'].forEach(ev => document.removeEventListener(ev, firstGesture)); };
+['pointerdown','keydown','touchstart'].forEach(ev => document.addEventListener(ev, firstGesture));
+enterScene();
 </script>
 </body>
 </html>

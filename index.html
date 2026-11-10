@@ -46,7 +46,7 @@ body.gl #bg{visibility:hidden}
 
 #indicator{position:absolute;pointer-events:none}
 #indface{position:absolute;left:0;top:0;width:740px;height:400px;transform-origin:0 0;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(100deg,#0a0605,#100907 60%,#0b0706);color:#e8321d;font-family:"DejaVu Sans Mono","Courier New",monospace;font-weight:700;font-size:290px;line-height:1;
+  background:linear-gradient(100deg,#0a0605,#100907 60%,#0b0706);color:#e8321d;font-family:"DejaVu Sans Mono","Courier New",monospace;font-weight:400;font-size:290px;line-height:1;
   text-shadow:0 0 10px rgba(255,60,30,.85),0 0 34px rgba(255,40,20,.4);opacity:.9;filter:blur(.5px);overflow:hidden;
   box-shadow:inset 0 0 60px rgba(0,0,0,.85)}
 
@@ -529,12 +529,20 @@ const ind = $('#indicator'), face = $('#indface'), digit = $('#digit');
   const fit = () => { face.style.transform = 'scale(' + (ind.clientWidth / bw) + ') ' + M; };
   new ResizeObserver(fit).observe(ind); fit();
 })();
-const SEQ = ['1','1','1','1','0','1','1','-1','1','1','4:44','1','1','1','0'];
+const SEQ = ['1','1','1','0','1','4:44','1','-1','1','3','1','-10','1','6','1','13','1','1','0','1','27','1','4:44','1','-1','1','66','1','9','1','-3','1','0','1','88','1','2','1','-13','1','4:44','1'];
 let si = 0;
+function fontFor(t){ return t.length >= 4 ? 170 : t.length === 3 ? 215 : t.length === 2 ? 250 : 290; }
+function setDigit(t){ digit.textContent = t; face.style.fontSize = fontFor(t) + 'px'; }
 (function tickIndicator(){
-  si = (si + 1) % SEQ.length; digit.textContent = SEQ[si];
-  face.style.fontSize = (SEQ[si].length > 2 ? 190 : 290) + 'px';
-  setTimeout(tickIndicator, 2200 + Math.random() * 4200);
+  si = (si + 1) % SEQ.length;
+  const t = SEQ[si];
+  if (t.length > 1 && Math.random() < 0.6){                  // странные этажи иногда мигают, прежде чем встать
+    setDigit(t); face.style.opacity = .25;
+    setTimeout(() => { face.style.opacity = .9; }, 90);
+    setTimeout(() => { face.style.opacity = .3; }, 190);
+    setTimeout(() => { face.style.opacity = .9; }, 270);
+  } else setDigit(t);
+  setTimeout(tickIndicator, 1100 + Math.random() * 2400);
 })();
 
 /* ---------- мерцание лампы в кабине ---------- */

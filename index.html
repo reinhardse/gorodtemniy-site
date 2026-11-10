@@ -309,7 +309,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 /* ---------- почта (окно с адресом) ---------- */
 const MAIL = 'gorodtemny@gmail.com';
 function openMail(){
-  openModal('<div class="mailcard"><div class="org">Администрация города Тёмный</div><h2>Приёмная города</h2>' +
+  openModal('<div class="mailcard"><h2>Приёмная города</h2>' +
     '<p>Жалобы, наблюдения, свидетельства о Сиянии и всё, что вы не смогли объяснить, присылайте сюда.</p>' +
     '<div class="addr">' + MAIL + '</div><br><button class="btn" type="button" id="copymail">Скопировать адрес</button></div>');
   $('#copymail').addEventListener('click', async ev => {
@@ -440,9 +440,8 @@ const stand = mk('button', 'hs', STAND); stand.type = 'button'; stand.setAttribu
 bindTip(stand, 'О городе<small>информационный стенд</small>');
 stand.addEventListener('click', () => {
   if (dragged) return;
-  openModal('<div class="org">Администрация города Тёмный · Информационный стенд</div>' +
-    '<div class="about"><img src="logo2.jpg" alt="Логотип «Тёмный»"><div><h2>Тёмный</h2>' +
-    '<div class="tag">Город, в котором был каждый.</div><p>' + ABOUT + '</p></div></div>');
+  openModal('<div class="about"><img src="logo3.jpg" alt="Логотип «Тёмный»"><div><h2>Тёмный</h2>' +
+    '<div class="tag">Город, в котором был каждый.<br>Добро пожаловать домой.</div><p>' + ABOUT + '</p></div></div>');
 });
 
 /* лифт */

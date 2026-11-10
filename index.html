@@ -203,11 +203,11 @@ body.in #contact2{opacity:1;pointer-events:auto}
   #c-back{position:fixed;z-index:13;left:12px;top:calc(12px + env(safe-area-inset-top));display:none;padding:12px 16px;border-radius:4px;color:#e6d9ae;font:inherit;font-size:15px;letter-spacing:.14em;
     text-transform:uppercase;background:linear-gradient(180deg,rgba(24,20,12,.6),rgba(8,7,4,.7));border:1px solid rgba(255,220,150,.25);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
   body.cview #c-back{display:block}
-  #contact2{display:none;padding:22px 20px 20px}
+  #contact2{display:none;padding:14px 14px 12px}
   body.cview #contact2{display:block}
-  #contact2 .c-title{font-size:17px;margin:0 0 16px}
-  #c2-list{gap:14px}
-  #c2-list .c2-b svg{width:44px;height:44px;padding:16px}
+  #contact2 .c-title{font-size:13px;margin:0 0 10px}
+  #c2-list{gap:10px}
+  #c2-list .c2-b svg{width:28px;height:28px;padding:12px}
   #hint{display:none}
 }
 /* modal */
@@ -412,7 +412,7 @@ c2.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list
   bindTip(tg, 'Telegram<small>@gorodtemny_bot</small>'); bindTip(ml, 'Почта<small>gorodtemny@gmail.com</small>'); }
 function placeC2(){
   const r = c2anchor.getBoundingClientRect(), w = c2.offsetWidth, h = c2.offsetHeight;
-  const x = Math.min(Math.max(r.left - w, 8), innerWidth - w - 8), y = Math.min(Math.max(r.top, 8), innerHeight - h - 16);
+  const x = Math.min(Math.max(r.left - w, 8), innerWidth - w - 8), y = Math.min(Math.max(r.top - (portrait0() ? 28 : 0), 8), innerHeight - h - 16);
   c2.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
 }
 

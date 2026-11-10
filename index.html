@@ -175,6 +175,7 @@ body.in #contact2{opacity:1;pointer-events:auto}
 #c2-list .c2-b:hover svg,#c2-list .c2-b:focus-visible svg{outline:none;color:#fff1c4;background:rgba(255,190,100,.14);border-color:rgba(255,205,130,.6);box-shadow:0 0 18px rgba(255,180,80,.28)}
 #c2-list .c2-b:focus-visible{outline:none}
 @media (max-width:760px){#contact2{padding:8px 8px 6px}#contact2 .c-title{font-size:9px;margin:0 0 6px}#c2-list .c2-b svg{width:18px;height:18px;padding:6px}}
+.moth{position:absolute;pointer-events:none;border-radius:50%;background:#efe3b8;box-shadow:0 0 calc(var(--u,1px)*5) rgba(255,230,160,.8);will-change:opacity}
 /* modal */
 #modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;
   background:rgba(2,2,1,.72);backdrop-filter:blur(2px)}
@@ -355,7 +356,7 @@ function labelBox(i, cls, title, sub, icon, tipHtml, make){
 
 
 /* «Написать нам»: плашка поверх сцены, под почтовым блоком, правый край по правому краю блока */
-const c2anchor = mk('div', 'layer', { x:1560, y:770, w:2, h:2 });
+const c2anchor = mk('div', 'layer', { x:1560, y:730, w:2, h:2 });
 const c2 = document.createElement('div'); c2.id = 'contact2';
 c2.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list"></div>'; document.body.appendChild(c2);
 { const l = $('#c2-list');
@@ -368,6 +369,33 @@ function placeC2(){
   const r = c2anchor.getBoundingClientRect(), w = c2.offsetWidth, h = c2.offsetHeight;
   const x = Math.min(Math.max(r.left - w, 8), innerWidth - w - 8), y = Math.min(Math.max(r.top, 8), innerHeight - h - 16);
   c2.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+}
+
+/* мошки у правого верхнего светильника */
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const moths = [];
+  for (let i = 0; i < 7; i++){
+    const sz = 2 + Math.random() * 2;
+    const el = mk('div', 'moth', { x:LAMP.cx, y:LAMP.cy, w:sz, h:sz * 0.75 });
+    moths.push({ el, sz, x:LAMP.cx + (Math.random()-.5)*80, y:LAMP.cy + (Math.random()-.5)*60, tx:LAMP.cx, ty:LAMP.cy, vx:0, vy:0, next:0, ph:Math.random()*9, sp:.6 + Math.random()*.8 });
+  }
+  let mt = performance.now();
+  (function mothLoop(now){
+    const dt = Math.min(.05, (now - mt) / 1000); mt = now;
+    for (const m of moths){
+      if (now > m.next){
+        const a = Math.random() * 6.283, r = 8 + Math.random() * 62;
+        m.tx = LAMP.cx - 6 + Math.cos(a) * r * 1.2; m.ty = LAMP.cy + 6 + Math.sin(a) * r * .8;
+        m.next = now + 250 + Math.random() * 1100;
+      }
+      m.vx += (m.tx - m.x) * 3.2 * m.sp * dt; m.vy += (m.ty - m.y) * 3.2 * m.sp * dt;
+      m.vx *= .93; m.vy *= .93;
+      m.x += m.vx * dt * 6; m.y += m.vy * dt * 6;
+      place(m.el, { x:m.x, y:m.y, w:m.sz, h:m.sz * .75 });
+      m.el.style.opacity = (.45 + .45 * Math.abs(Math.sin(now / 38 * m.sp + m.ph))).toFixed(2);
+    }
+    requestAnimationFrame(mothLoop);
+  })(performance.now());
 }
 /* ---------- ящики: просто часть сцены ---------- */
 /* левая колонка: «пустые» ящики */

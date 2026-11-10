@@ -31,8 +31,12 @@ body.gl #bg{visibility:hidden}
 #bg{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .layer{position:absolute;pointer-events:none}
 .stlogo{position:absolute;left:0;top:0;width:1254px;height:1106px;transform-origin:0 0;background:#0b0b0b url(logo2.jpg) 0 -110px/1254px 1254px no-repeat;
-  filter:brightness(.72) contrast(.92) saturate(.78) blur(.9px);box-shadow:inset 0 0 170px rgba(0,0,0,.6)}
-.stlogo::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(8,14,8,.38),rgba(8,14,8,.08) 60%,rgba(40,30,15,.12))}
+  filter:brightness(.74) contrast(.92) saturate(.8) blur(.7px);
+  box-shadow:inset 0 0 90px rgba(0,0,0,.7),inset 0 46px 60px -20px rgba(0,0,0,.75),inset -46px 0 60px -26px rgba(0,0,0,.55)}
+.stlogo::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,rgba(6,12,6,.45),rgba(6,12,6,.12) 55%,rgba(55,38,16,.16)),
+             url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .45  0 0 0 .55 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>");
+  opacity:.9;mix-blend-mode:multiply}
 #dim-core{background:#020302;opacity:0}
 #dim-spill{background:radial-gradient(ellipse 50% 50% at 50% 52%,rgba(2,3,2,.9),rgba(2,3,2,.5) 50%,rgba(2,3,2,0) 100%);opacity:0}
 #lampglow{background:radial-gradient(circle,rgba(255,196,110,.55) 0%,rgba(255,170,70,.18) 38%,rgba(255,160,60,0) 70%);
@@ -334,8 +338,8 @@ BOX_COLS.forEach(r => {
 
 /* новый логотип в рамке стенда: плоская картинка, натянутая на четырёхугольник стенда (перспектива) */
 (function(){
-  const Q = [[1248,236],[1439,216],[1439,394],[1250,404]];            // TL, TR, BR, BL в пикселях сцены
-  const x0 = 1248, y0 = 216, bw = 191, bh = 188;
+  const Q = [[1250,237],[1437,218],[1437,393],[1252,403]];            // TL, TR, BR, BL в пикселях сцены
+  const x0 = 1250, y0 = 218, bw = 187, bh = 185;
   const SW = 1254, SH = 1106;                                          // кроп исходника: без лишнего чёрного снизу
   const wrap = mk('div', 'layer', { x:x0, y:y0, w:bw, h:bh });
   const face = document.createElement('div'); face.className = 'stlogo'; wrap.appendChild(face);

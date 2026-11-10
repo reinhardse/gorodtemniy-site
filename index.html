@@ -354,8 +354,8 @@ function labelBox(i, cls, title, sub, icon, tipHtml, make){
 
 
 
-/* «Написать нам»: плашка поверх сцены, правым нижним углом на углу ящика 84 */
-const c2anchor = mk('div', 'layer', { x:1490, y:705, w:2, h:2 });
+/* «Написать нам»: плашка поверх сцены, под почтовым блоком, правый край по правому краю блока */
+const c2anchor = mk('div', 'layer', { x:1560, y:770, w:2, h:2 });
 const c2 = document.createElement('div'); c2.id = 'contact2';
 c2.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list"></div>'; document.body.appendChild(c2);
 { const l = $('#c2-list');
@@ -366,7 +366,7 @@ c2.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list
   bindTip(tg, 'Telegram<small>@gorodtemny_bot</small>'); bindTip(ml, 'Почта<small>gorodtemny@gmail.com</small>'); }
 function placeC2(){
   const r = c2anchor.getBoundingClientRect(), w = c2.offsetWidth, h = c2.offsetHeight;
-  const x = Math.min(Math.max(r.left - w, 8), innerWidth - w - 8), y = Math.min(Math.max(r.top - h, 8), innerHeight - h - 8);
+  const x = Math.min(Math.max(r.left - w, 8), innerWidth - w - 8), y = Math.min(Math.max(r.top, 8), innerHeight - h - 16);
   c2.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
 }
 /* ---------- ящики: просто часть сцены ---------- */

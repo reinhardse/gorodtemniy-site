@@ -280,6 +280,7 @@ const STAND = { x:1245, y:208, w:203, h:202 };
 const LIFT  = { x:712,  y:255, w:160, h:687 };          // проём лифта
 const INDIC = { x:804,  y:134, w:101, h:79  };   // охватывающий прямоугольник табло; углы — ниже, в warp
 const LAMP  = { cx:1565, cy:80, r:150 };
+const NOSOUND = matchMedia('(max-width:760px)').matches || matchMedia('(pointer:coarse)').matches;   // на телефоне звука нет
 
 const EMPTY_LINES = [
   'Пусто.',
@@ -488,8 +489,9 @@ stand.addEventListener('click', () => {
 /* лифт */
 const lift = mk('button', 'hs', LIFT); lift.type = 'button'; lift.setAttribute('aria-label', 'Лифт');
 bindTip(lift, 'Лифт');
+if (NOSOUND) { lift.style.pointerEvents = 'none'; }   // на телефоне лифт не нажимается
 const LIFT_LINES = ['Не надо туда идти.'];
-lift.addEventListener('click', () => { if (!dragged) { toast(LIFT_LINES[Math.floor(Math.random() * LIFT_LINES.length)]); zap(); } });
+lift.addEventListener('click', () => { if (NOSOUND) return; if (!dragged) { toast(LIFT_LINES[Math.floor(Math.random() * LIFT_LINES.length)]); zap(); } });
 
 /* ---------- раскладка и панорама ---------- */
 let W = 0, H = 0, vw = 0, vh = 0, minX = 0, minY = 0;
@@ -659,7 +661,7 @@ function setDigit(t){ digit.textContent = t; face.style.fontSize = fontFor(t) + 
     setTimeout(() => { face.style.opacity = .3; }, 190);
     setTimeout(() => { face.style.opacity = .9; }, 270);
   } else setDigit(t);
-  setTimeout(tickIndicator, 1100 + Math.random() * 2400);
+  setTimeout(tickIndicator, NOSOUND ? 450 + Math.random() * 1100 : 1100 + Math.random() * 2400);   // на телефоне цифры меняются чаще
 })();
 // 7 · 1 · 2 · 6 · 4 · 4 · 1: в случайный момент табло медленно выдаёт эту последовательность, потом снова живёт как обычно
 (function secretSequence(){
@@ -705,7 +707,6 @@ function flicker(){
 
 /* ---------- звук ---------- */
 let ac = null, master = null, muted = false;
-const NOSOUND = matchMedia('(max-width:760px)').matches || matchMedia('(pointer:coarse)').matches;   // на телефоне звука нет
 function startAudio(){
   if (ac || NOSOUND) return;
   try {

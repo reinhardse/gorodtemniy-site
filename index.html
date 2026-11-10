@@ -159,32 +159,14 @@ body.in #contact{opacity:1;pointer-events:auto}
 .hdr-note.on{opacity:1}
 .hs .tag,.hdr-note{transition:opacity .12s}
 
-.cbtn{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u,1px)*4);text-align:center;color:#d9cca3;text-decoration:none;
-  background:linear-gradient(180deg,rgba(24,20,12,.52),rgba(8,7,4,.62));border:1px solid rgba(255,220,150,.22);border-radius:calc(var(--u,1px)*4);
-  box-shadow:0 calc(var(--u,1px)*8) calc(var(--u,1px)*24) rgba(0,0,0,.5),inset 0 1px 0 rgba(255,225,160,.14),inset 0 0 calc(var(--u,1px)*20) rgba(255,170,70,.05);
-  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);text-shadow:0 1px 3px #000;opacity:0;transition:opacity .12s,background .25s,border-color .25s,box-shadow .25s;font:inherit}
-.cbtn.on{opacity:1}
-.cbtn .ci{width:calc(var(--u,1px)*22);height:calc(var(--u,1px)*22);padding:calc(var(--u,1px)*8);box-sizing:content-box;border-radius:calc(var(--u,1px)*3);
-  background:rgba(0,0,0,.35);border:1px solid rgba(255,220,150,.18);color:#e6d9ae;display:block}
-.cbtn .ci svg{width:100%;height:100%;display:block}
-.cbtn .cn{font-size:calc(var(--u,1px)*13);letter-spacing:.14em;text-transform:uppercase}
-.cbtn .ch{font-size:calc(var(--u,1px)*9.5);letter-spacing:.02em;opacity:.65}
-.cbtn:hover{color:#fff1c4;background:rgba(255,190,100,.14);border-color:rgba(255,205,130,.6);box-shadow:0 0 calc(var(--u,1px)*18) rgba(255,180,80,.3)}
-.cbtn:hover .ci{color:#fff1c4;border-color:rgba(255,205,130,.7)}
-.hdr-note{font-size:calc(var(--u,1px)*13)!important;letter-spacing:.28em!important;color:#e6d9ae!important}
-
-#contact2{position:fixed;z-index:12;right:clamp(24px,3.4vw,60px);top:86%;transform:translateY(-50%);padding:16px 14px 14px;border-radius:4px;
-  background:linear-gradient(180deg,rgba(24,20,12,.52),rgba(8,7,4,.62));border:1px solid rgba(255,220,150,.2);
-  box-shadow:0 10px 36px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,225,160,.14),inset 0 0 30px rgba(255,170,70,.05);
-  backdrop-filter:blur(7px) saturate(.9);-webkit-backdrop-filter:blur(7px) saturate(.9);text-shadow:0 1px 3px rgba(0,0,0,.9);
-  opacity:0;pointer-events:none;transition:opacity 2s .6s}
-body.in #contact2{opacity:1;pointer-events:auto}
-#contact2 .c-title{font-size:13px}
-#c2-list{display:flex;gap:8px;justify-content:center}
-#c2-list .c-btn{width:auto;padding:8px}
-#c2-list .c-btn svg{margin:0}
-#c2-list .c-btn:hover{transform:translateY(-2px)}
-@media (max-width:760px){#contact2{top:12px;right:8px;transform:none;padding:8px 8px 6px}#contact2 .c-title{font-size:9px;margin:0 0 6px}}
+/* кнопки связи прямо на светлых ящиках: без тёмных подложек */
+.cpan{position:absolute;display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u,1px)*5);pointer-events:auto}
+.cpan .cp-t{font-size:calc(var(--u,1px)*9);letter-spacing:.16em;text-transform:uppercase;color:#14100a;font-weight:700;white-space:nowrap;font-size:calc(var(--u,1px)*10)}
+.cpan .cp-r{display:flex;gap:calc(var(--u,1px)*6)}
+.cpan .cp-b{width:calc(var(--u,1px)*40);height:calc(var(--u,1px)*40);display:grid;place-items:center;padding:0;margin:0;border:0;background:none;
+  color:#14100a;cursor:pointer;text-decoration:none;transition:transform .2s,color .2s;-webkit-tap-highlight-color:transparent}
+.cpan .cp-b svg{width:100%;height:100%;display:block;filter:drop-shadow(0 1px 0 rgba(255,255,255,.25))}
+.cpan .cp-b:hover,.cpan .cp-b:focus-visible{outline:none;color:#000;transform:translateY(-2px)}
 /* modal */
 #modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;
   background:rgba(2,2,1,.72);backdrop-filter:blur(2px)}
@@ -364,14 +346,15 @@ function labelBox(i, cls, title, sub, icon, tipHtml, make){
 
 
 
-/* правая панелька: Написать нам */
-{ const box = document.createElement('div'); box.id = 'contact2';
-  box.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list"></div>'; document.body.appendChild(box);
-  const l = $('#c2-list');
-  const tg = document.createElement('a'); tg.className = 'c-btn'; tg.href = 'https://t.me/gorodtemny_bot'; tg.target = '_blank'; tg.rel = 'noopener noreferrer';
-  tg.setAttribute('aria-label', 'Telegram: @gorodtemny_bot'); tg.innerHTML = IC_TG; l.appendChild(tg);
-  const ml = document.createElement('button'); ml.type = 'button'; ml.className = 'c-btn'; ml.setAttribute('aria-label', 'Написать письмо');
-  ml.innerHTML = IC_ML; ml.addEventListener('click', openMail); l.appendChild(ml); }
+/* правая кнопки связи: прямо на нижнем правом ящике (84) */
+{ const cpan = mk('div', 'cpan', { x:1490-96, y:705-68, w:96, h:68 });
+  cpan.innerHTML = '<span class="cp-t">Написать нам</span><span class="cp-r"></span>';
+  const row = cpan.querySelector('.cp-r');
+  const tg = document.createElement('a'); tg.className = 'cp-b'; tg.href = 'https://t.me/gorodtemny_bot'; tg.target = '_blank'; tg.rel = 'noopener noreferrer';
+  tg.setAttribute('aria-label', 'Telegram: @gorodtemny_bot'); tg.innerHTML = IC_TG; row.appendChild(tg);
+  const ml = document.createElement('button'); ml.type = 'button'; ml.className = 'cp-b'; ml.setAttribute('aria-label', 'Написать письмо');
+  ml.innerHTML = IC_ML; ml.addEventListener('click', () => { if (!dragged) openMail(); }); row.appendChild(ml);
+  bindTip(tg, 'Telegram<small>@gorodtemny_bot</small>'); bindTip(ml, 'Почта<small>gorodtemny@gmail.com</small>'); }
 /* ---------- ящики: просто часть сцены ---------- */
 /* левая колонка: «пустые» ящики */
 const BOX_COLS = [

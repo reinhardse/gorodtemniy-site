@@ -437,10 +437,10 @@ BOX_COLS.forEach(r => {
 
 /* стенд */
 const stand = mk('button', 'hs', STAND); stand.type = 'button'; stand.setAttribute('aria-label', 'О городе');
-bindTip(stand, 'О городе<small>информационный стенд</small>');
+bindTip(stand, 'Город<small>информация</small>');
 stand.addEventListener('click', () => {
   if (dragged) return;
-  openModal('<div class="org">Информационный стенд</div><div class="about"><img src="logo3.jpg" alt="Логотип «Тёмный»"><div><h2>Тёмный</h2>' +
+  openModal('<div class="org">Информация</div><div class="about"><img src="logo3.jpg" alt="Логотип «Тёмный»"><div><h2>Тёмный</h2>' +
     '<p>' + ABOUT + '</p></div></div>');
 });
 

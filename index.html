@@ -377,7 +377,7 @@ stand.addEventListener('click', () => {
 /* лифт */
 const lift = mk('button', 'hs', LIFT); lift.type = 'button'; lift.setAttribute('aria-label', 'Лифт');
 bindTip(lift, 'Лифт');
-const LIFT_LINES = ['Не стоит туда идти.', 'Не стоит туда идти.', 'Не стоит туда идти. Он уже знает, что ты здесь.', 'Туда лучше не ходить.'];
+const LIFT_LINES = ['Лифт поедет, когда вы будете готовы. Вы не готовы.'];
 lift.addEventListener('click', () => { if (!dragged) { toast(LIFT_LINES[Math.floor(Math.random() * LIFT_LINES.length)]); zap(); } });
 
 /* ---------- раскладка и панорама ---------- */

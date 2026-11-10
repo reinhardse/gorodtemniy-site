@@ -344,13 +344,8 @@ addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 /* ---------- почта (окно с адресом) ---------- */
 const MAIL = 'gorodtemny@gmail.com';
 function openMail(){
-  openModal('<div class="mailcard"><h2>Приёмная города</h2>' +
-    '<p>Жалобы, наблюдения, свидетельства о Сиянии и всё, что вы не смогли объяснить, присылайте сюда.</p>' +
-    '<div class="addr">' + MAIL + '</div><br><button class="btn" type="button" id="copymail">Скопировать адрес</button></div>');
-  $('#copymail').addEventListener('click', async ev => {
-    try { await navigator.clipboard.writeText(MAIL); ev.target.textContent = 'Скопировано'; }
-    catch (_) { ev.target.textContent = 'Выделите адрес и скопируйте'; }
-  });
+  openModal('<div class="mailcard"><div class="addr" style="user-select:all;-webkit-user-select:all">' + MAIL + '</div><br>' +
+    '<a class="btn" href="mailto:' + MAIL + '">Написать письмо</a></div>');
 }
 
 /* ---------- левая панель: каналы города (по порядку) ---------- */

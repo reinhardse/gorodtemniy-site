@@ -781,8 +781,10 @@ function enterScene(){
   setTimeout(() => { introDone = true; }, 3600);
 }
 // звук стартует с первого касания/клика: браузер без этого не даёт играть аудио
-const GEST = ['pointerdown','pointerup','mousedown','click','keydown','touchend','wheel'];
-const firstGesture = () => {
+const GEST = ['pointerdown','pointerup','mousedown','click','keydown','touchend','wheel','mousemove','pointermove'];
+let lastTry = 0;
+const firstGesture = (e) => {
+  if (e && (e.type === 'mousemove' || e.type === 'pointermove')){ const n = performance.now(); if (n - lastTry < 400) return; lastTry = n; }   // движение мыши пробуем не чаще раза в 0,4 с
   startAudio();
   if (NOSOUND) { GEST.forEach(ev => removeEventListener(ev, firstGesture, true)); return; }
   if (ac && ac.state === 'running') { GEST.forEach(ev => removeEventListener(ev, firstGesture, true)); return; }

@@ -781,8 +781,14 @@ function enterScene(){
   setTimeout(() => { introDone = true; }, 3600);
 }
 // звук стартует с первого касания/клика: браузер без этого не даёт играть аудио
-const firstGesture = () => { startAudio(); ['pointerdown','keydown','touchstart'].forEach(ev => document.removeEventListener(ev, firstGesture)); };
-['pointerdown','keydown','touchstart'].forEach(ev => document.addEventListener(ev, firstGesture));
+const GEST = ['pointerdown','pointerup','mousedown','click','keydown','touchend','wheel'];
+const firstGesture = () => {
+  startAudio();
+  if (NOSOUND) { GEST.forEach(ev => removeEventListener(ev, firstGesture, true)); return; }
+  if (ac && ac.state === 'running') { GEST.forEach(ev => removeEventListener(ev, firstGesture, true)); return; }
+  if (ac) ac.resume().then(() => { if (ac && ac.state === 'running') GEST.forEach(ev => removeEventListener(ev, firstGesture, true)); }).catch(() => {});
+};
+GEST.forEach(ev => addEventListener(ev, firstGesture, true));   // пока браузер не разрешил звук, любое действие пробует его включить
 enterScene();
 startAudio();
 </script>

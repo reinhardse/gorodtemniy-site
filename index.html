@@ -30,7 +30,7 @@ body.gl #gl{display:block}
 body.gl #bg{visibility:hidden}
 #bg{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .layer{position:absolute;pointer-events:none}
-.stlogo{position:absolute;left:0;top:0;width:1254px;height:1106px;transform-origin:0 0;background:#0b0b0b url(logo2.jpg) 0 -110px/1254px 1254px no-repeat;
+.stlogo{position:absolute;left:0;top:0;width:1254px;height:1155px;transform-origin:0 0;background:#0b0b0b url(logo2.jpg) 0 -49px/1254px 1254px no-repeat;
   filter:brightness(.74) contrast(.92) saturate(.8) blur(.7px);
   box-shadow:inset 0 0 90px rgba(0,0,0,.7),inset 0 46px 60px -20px rgba(0,0,0,.75),inset -46px 0 60px -26px rgba(0,0,0,.55)}
 .stlogo::after{content:"";position:absolute;inset:0;
@@ -338,9 +338,9 @@ BOX_COLS.forEach(r => {
 
 /* новый логотип в рамке стенда: плоская картинка, натянутая на четырёхугольник стенда (перспектива) */
 (function(){
-  const Q = [[1250,237],[1437,218],[1437,393],[1252,403]];            // TL, TR, BR, BL в пикселях сцены
-  const x0 = 1250, y0 = 218, bw = 187, bh = 185;
-  const SW = 1254, SH = 1106;                                          // кроп исходника: без лишнего чёрного снизу
+  const Q = [[1253,242],[1436,219],[1436,397],[1253.5,401]];            // TL, TR, BR, BL в пикселях сцены
+  const x0 = 1253, y0 = 219, bw = 183, bh = 182;
+  const SW = 1254, SH = 1155;                                          // кроп исходника: без лишнего чёрного снизу
   const wrap = mk('div', 'layer', { x:x0, y:y0, w:bw, h:bh });
   const face = document.createElement('div'); face.className = 'stlogo'; wrap.appendChild(face);
   const dst = Q.map(p => [p[0]-x0, p[1]-y0]), src = [[0,0],[SW,0],[SW,SH],[0,SH]];

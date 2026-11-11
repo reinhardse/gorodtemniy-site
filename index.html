@@ -237,10 +237,10 @@ body.in #contact2{opacity:1;pointer-events:auto}
 @media (hover:none) and (pointer:coarse){#snd{display:none!important}}
 /* modal */
 #modal{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;
-  background:rgba(2,2,1,.72);backdrop-filter:blur(2px)}
+  background:rgba(2,2,1,.8)}
 #modal.on{display:flex;animation:fadein .35s forwards}
 #modal .card{position:relative;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:30px 32px 32px;
-  background:#cfc7a8;color:#1c1a14;box-shadow:0 24px 80px rgba(0,0,0,.7),inset 0 0 60px rgba(90,70,30,.35);
+  background:#cfc7a8;color:#1c1a14;box-shadow:0 14px 40px rgba(0,0,0,.6);
   border:1px solid #8c8158}
 #modal .x{position:absolute;right:10px;top:8px;width:36px;height:36px;font-size:22px;color:#4a4330}
 #modal .x:hover{color:#000}
@@ -359,6 +359,7 @@ function bindTip(el, html){
 /* ---------- модальное окно ---------- */
 const modal = $('#modal'), modalBody = $('#modal-body');
 let lastFocus = null;
+{ const pre = new Image(); pre.src = 'logo3.jpg'; if (pre.decode) pre.decode().catch(() => {}); }   // логотип грузим заранее
 function openModal(html){
   lastFocus = document.activeElement; modalBody.innerHTML = html; modal.classList.add('on'); hideTip();
   modal.querySelector('.x').focus();
@@ -622,6 +623,7 @@ function setupDepth(depthImg){
   });
 }
 function parallaxFrame(){
+  if (modal.classList.contains('on')) return;   // пока открыто окно — сцену не перерисовываем, чтобы не лагало
   const now = performance.now(), t = now / 1000;
   const idle = (now - lastMouse > 2500) || portrait();
   const gx = idle ? Math.sin(t * 0.45) * 0.6 : tlx;

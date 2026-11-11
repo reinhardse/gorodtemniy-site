@@ -430,7 +430,7 @@ c2.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list
   const ml = document.createElement('button'); ml.type = 'button'; ml.className = 'c2-b'; ml.setAttribute('aria-label', 'Написать письмо');
   ml.innerHTML = IC_ML; ml.addEventListener('click', openMail); l.appendChild(ml);
   bindTip(tg, 'Telegram<small>@gorodtemny_bot</small>'); bindTip(ml, 'Почта<small>gorodtemny@gmail.com</small>'); }
-const scratch = mk('img', '', { x:421, y:775, w:182, h:92 }); scratch.id = 'scratch'; scratch.src = 'scratch.png'; scratch.alt = '';
+const scratch = mk('img', '', { x:431, y:775, w:182, h:92 }); scratch.id = 'scratch'; scratch.src = 'scratch.png'; scratch.alt = '';
 function placeScratch(){}
 function placeC2(){
   const r = c2anchor.getBoundingClientRect(), w = c2.offsetWidth, h = c2.offsetHeight;
@@ -751,7 +751,7 @@ function startAudio(){
     const ng = ac.createGain(); ng.gain.value = 0.1; ns.connect(ng); ng.connect(master); ns.start();
     ac.resume && ac.resume();
     const sb = document.getElementById('snd');
-    const lab = () => { if (!sb || muted || !ac) return; sb.textContent = ac.state === 'running' ? 'звук: вкл' : 'нажмите — включится звук'; sb.setAttribute('aria-pressed','false'); };
+    const lab = () => { if (!sb || muted || !ac) return; sb.textContent = ac.state === 'running' ? 'звук: вкл' : 'звук: вкл'; sb.setAttribute('aria-pressed','false'); };
     ac.onstatechange = lab; lab();   // пока браузер не разрешил звук — подсказка
   } catch (_) { ac = null; }
 }

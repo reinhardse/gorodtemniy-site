@@ -120,7 +120,8 @@ body.in #contact{opacity:1;pointer-events:auto}
 /* выцарапанная на стене надпись (только десктоп) */
 #scratch{position:absolute;pointer-events:none;user-select:none;opacity:.85;image-rendering:auto}
 
-@media (hover:none) and (pointer:coarse){#scratch{display:none}}
+#scratchM{display:none}
+@media (hover:none) and (pointer:coarse){#scratch{display:none}#scratchM{display:block;position:absolute;pointer-events:none;user-select:none;opacity:.85}}
 #contact::before,#contact::after{display:none}
 .c-org{display:none}
 .c-title{margin:0 0 12px;font-size:13px;line-height:1.2;font-weight:400;letter-spacing:.28em;text-transform:uppercase;text-align:center;color:#e6d9ae;
@@ -431,6 +432,7 @@ c2.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list
   ml.innerHTML = IC_ML; ml.addEventListener('click', openMail); l.appendChild(ml);
   bindTip(tg, 'Telegram<small>@gorodtemny_bot</small>'); bindTip(ml, 'Почта<small>gorodtemny@gmail.com</small>'); }
 const scratch = mk('img', '', { x:431, y:775, w:182, h:92 }); scratch.id = 'scratch'; scratch.src = 'scratch.png'; scratch.alt = '';
+const scratchM = mk('img', '', { x:1316, y:785, w:182, h:92 }); scratchM.id = 'scratchM'; scratchM.src = 'scratch.png'; scratchM.alt = '';
 function placeScratch(){}
 function placeC2(){
   const r = c2anchor.getBoundingClientRect(), w = c2.offsetWidth, h = c2.offsetHeight;

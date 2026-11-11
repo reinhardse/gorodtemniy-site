@@ -359,6 +359,7 @@ function bindTip(el, html){
 /* ---------- модальное окно ---------- */
 const modal = $('#modal'), modalBody = $('#modal-body');
 let lastFocus = null;
+{ const pre = new Image(); pre.src = 'logo3.jpg'; if (pre.decode) pre.decode().catch(() => {}); }   // логотип грузим заранее
 function openModal(html){
   lastFocus = document.activeElement; modalBody.innerHTML = html; modal.classList.add('on'); hideTip();
   modal.querySelector('.x').focus();

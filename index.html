@@ -118,9 +118,9 @@ body.in #snd{opacity:1}
 body.in #contact{opacity:1;pointer-events:auto}
 
 /* выцарапанная на стене надпись под панелью (только десктоп) */
-#scratch{position:fixed;z-index:11;left:clamp(40px,5.6vw,92px);top:0;width:min(264px,31vw);pointer-events:none;user-select:none;
-  font:italic 12.5px/1.35 "Courier New",ui-monospace,monospace;letter-spacing:.3px;color:rgba(214,206,184,.5);
-  transform:rotate(-1.6deg);transform-origin:left top;filter:url(#scr);
+#scratch{position:absolute;pointer-events:none;user-select:none;
+  font:italic 11px/1.4 "Courier New",ui-monospace,monospace;letter-spacing:.3px;color:rgba(214,206,184,.5);
+  transform:rotate(-1.6deg);transform-origin:left top;filter:url(#scr);height:auto!important;
   text-shadow:0 1px 0 rgba(0,0,0,.85),0 -1px 0 rgba(255,245,215,.12);
   opacity:0;transition:opacity 4s 2.5s}
 body.in #scratch{opacity:1}
@@ -280,7 +280,6 @@ body.in #contact2{opacity:1;pointer-events:auto}
   </div>
 </main>
 
-<div id="scratch" aria-hidden="true">Instagram — проект Meta Platforms Inc., деятельность которой в России запрещена</div>
 <svg width="0" height="0" style="position:absolute"><filter id="scr" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></svg>
 <aside id="contact" aria-label="Каналы города"><div class="c-title">Следить за городом</div><div class="c-rule"></div><div id="c-list"></div></aside>
 <button id="c-back" type="button" aria-label="Назад">← Назад</button>
@@ -436,10 +435,9 @@ c2.innerHTML = '<h2 class="c-title">Написать нам</h2><div id="c2-list
   const ml = document.createElement('button'); ml.type = 'button'; ml.className = 'c2-b'; ml.setAttribute('aria-label', 'Написать письмо');
   ml.innerHTML = IC_ML; ml.addEventListener('click', openMail); l.appendChild(ml);
   bindTip(tg, 'Telegram<small>@gorodtemny_bot</small>'); bindTip(ml, 'Почта<small>gorodtemny@gmail.com</small>'); }
-function placeScratch(){
-  const sc=document.getElementById('scratch'), c=document.getElementById('contact'); if(!sc||!c) return;
-  const r=c.getBoundingClientRect(); sc.style.top=(r.bottom+22)+'px';
-}
+const scratch = mk('div', '', { x:425, y:696, w:205, h:60 }); scratch.id = 'scratch'; scratch.setAttribute('aria-hidden','true');
+scratch.textContent = 'Instagram — проект Meta Platforms Inc., деятельность которой в России запрещена';
+function placeScratch(){ scratch.style.fontSize = (scene.offsetWidth / IW * 11) + 'px'; }
 function placeC2(){
   const r = c2anchor.getBoundingClientRect(), w = c2.offsetWidth, h = c2.offsetHeight;
   const x = Math.min(Math.max(r.left - w, 8), innerWidth - w - 8), y = Math.min(Math.max(r.top - (portrait0() ? 28 : 0), 8), innerHeight - h - 16);

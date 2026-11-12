@@ -3,3 +3,7 @@
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
 </IfModule>
+
+<Files "bot-token.php">
+  Require all denied
+</Files>
